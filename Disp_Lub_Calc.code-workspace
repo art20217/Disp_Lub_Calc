@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../APP"
+		},
+		{
+			"name": "Geom_Tol_App",
+			"path": "../Geom_Tol_App"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Disp_Lub_Calc"
+	}
+}
