@@ -943,6 +943,52 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Part Number Editor (V3.13) -->
+                                <div class="mt-4 pt-4 border-t border-gray-700">
+                                    <div class="flex items-end space-x-2">
+                                        <!-- 1. 型號 (Prefix) -->
+                                        <div class="flex-1">
+                                            <label
+                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">型號</label>
+                                            <select v-model="groups[gIndex].partPrefix"
+                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                                <option value="T">T</option>
+                                                <option value="CDB">CDB</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 2. 入油口 (Suffix 1) -->
+                                        <div class="flex-1">
+                                            <label
+                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">入油口</label>
+                                            <select v-model="groups[gIndex].partSuffix1"
+                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                                <option value="">無</option>
+                                                <option value="S">S</option>
+                                                <option value="G">G</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 3. 出油口 (Suffix 2) -->
+                                        <div class="flex-1">
+                                            <label
+                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">出油口</label>
+                                            <select v-model="groups[gIndex].partSuffix2"
+                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                                <option value="">無</option>
+                                                <option value="S">S</option>
+                                                <option value="G">G</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Copy Button -->
+                                        <button @click="copyPartNumber(groups[gIndex], groupRes)"
+                                            class="bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-1.5 h-[32px] flex items-center justify-center transition shadow-sm border border-indigo-700 ml-2 font-bold text-sm"
+                                            title="複製件號">
+                                            <i class="fas fa-copy mr-1"></i> 複製
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div v-if="groups.length === 0" class="text-center text-gray-500 py-12">點擊上方按鈕新增第一組分配器</div>
@@ -1130,7 +1176,7 @@
             { id: 'ball_bearing', name: '滾珠軸承', svg: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg"><g stroke="#FFFFFF" stroke-width="2" fill="none"><circle cx="65" cy="65" r="60" /><circle cx="65" cy="65" r="52" /><circle cx="65" cy="65" r="36" /><circle cx="65" cy="65" r="28" /><circle cx="65" cy="21" r="7.5" /><circle cx="96.11" cy="33.89" r="7.5" /><circle cx="109" cy="65" r="7.5" /><circle cx="96.11" cy="96.11" r="7.5" /><circle cx="65" cy="109" r="7.5" /><circle cx="33.89" cy="96.11" r="7.5" /><circle cx="21" cy="65" r="7.5" /><circle cx="33.89" cy="33.89" r="7.5" /></g></svg>`, formulaStr: 'Q = 0.04 × 直徑 × 列數 × K', fields: { dim1: { label: '直徑' }, qty: { label: '列數' } }, calc: (d1, d2, qty, k) => 0.04 * (d1 / 10) * qty * k },
             { id: 'moving_bearing', name: '滑動軸承', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="12" cy="12" r="7" /><path d="M3 3 l18 18" opacity="0.2"/><path d="M21 3 l-18 18" opacity="0.2"/></svg>', formulaStr: 'Q = 0.023 × 直徑 × 長度 × K', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k) => 0.023 * (d1 / 10) * (d2 / 10) * k },
             { id: 'plane_slide', name: '平面滑動', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="8" rx="1"/><rect x="2" y="16" width="20" height="4"/><path d="M4 16l-2 4M8 16l-2 4M12 16l-2 4M16 16l-2 4M20 16l-2 4M24 17l-1 3"/></svg>', hasDirection: true, formulaStr: '水平: 0.0017×A×K / 垂直: 0.006×A×K (A=長×寬)', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * (d2 / 10); return (dir === 'vertical' ? 0.006 : 0.0017) * area * k; } },
-            { id: 'circle_track', name: '圓筒滑動軌道', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.2 16.2l2.8 2.8M19.1 4.9l-2.8 2.8M7.8 16.2l-2.8 2.8"/></svg>', hasDirection: true, formulaStr: '水平: 0.023×A×K / 垂直: 0.07×A×K (A=直徑×π×長)', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * 3.14 * (d2 / 10); return (dir === 'vertical' ? 0.07 : 0.023) * area * k; } },
+            { id: 'circle_track', name: '圓筒滑動軌道', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130" data-edited="true"><defs><clipPath id="grid-clip"><path d="M65,65 m-35,0 a35,35 0 1,0 70,0 a35,35 0 1,0 -70,0 z M65,65 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0 z" fill-rule="evenodd" stroke="#000000" stroke-width="2" fill="none"/></clipPath></defs><g stroke="#000000" stroke-width="1.5" fill="none"><circle cx="65" cy="65" r="15" stroke="#000000" stroke-width="2" fill="none"/><circle cx="65" cy="65" r="35" stroke="#000000" stroke-width="2" fill="none"/><g clip-path="url(#grid-clip)"><path d="M20,20 L110,110 M40,20 L110,90 M60,20 L110,70 M80,20 L110,50 M20,40 L90,110 M20,60 L70,110 M20,80 L50,110 M110,20 L20,110 M90,20 L20,90 M70,20 L20,70 M50,20 L20,50 M110,40 L40,110 M110,60 L60,110 M110,80 L80,110" stroke="#000000" stroke-width="2" fill="none"/></g><path d="M15,58 L15,15 L115,15 L115,58 L99.29,58 A35,35 0 0,0 30.71,58 L15,58 Z" stroke="#000000" stroke-width="2" fill="none"/><path d="M15,72 L30.71,72 A35,35 0 0,0 99.29,72 L115,72 L115,115 L15,115 Z" stroke="#000000" stroke-width="2" fill="none"/></g></svg>', hasDirection: true, formulaStr: '水平: 0.023×A×K / 垂直: 0.07×A×K (A=直徑×π×長)', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * 3.14 * (d2 / 10); return (dir === 'vertical' ? 0.07 : 0.023) * area * k; } },
             { id: 'linear_track', name: '線性滑軌', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16v-3h-4v-5h4l-8-8-8 8h4v5h-4z"/><line x1="12" y1="2" x2="12" y2="22"/></svg>', formulaStr: 'Q = 0.012 × 長度 × 列數 × K', fields: { dim1: { label: '長度' }, qty: { label: '列數' } }, calc: (d1, d2, qty, k) => 0.012 * (d1 / 10) * qty * k },
             { id: 'cam', name: '凸輪', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" /><path d="M12 9c0-4 4-6 4-6s-4-2-4-2-4 2-4 2 4 2 4 6z"/><circle cx="12" cy="15" r="2" /></svg>', formulaStr: 'Q = 0.013 × 圓周 × 寬度 × K', fields: { dim1: { label: '圓周' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.013 * (d1 / 10) * (d2 / 10) * k },
             {
@@ -1154,7 +1200,7 @@
                 const selectedPointIds = ref([]);
                 const newPoint = reactive({ name: '', kFactor: 1.0, rpm: null, direction: 'horizontal', dim1: 0, dim2: 0, qty: 1 });
                 const points = ref([]);
-                const groups = ref([{ id: 101, name: 'Group A', slots: [null], isEditing: false }]);
+                const groups = ref([{ id: 101, name: 'Group A', slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'S', partSuffix2: '' }]);
                 const settings = reactive({ pipeLength: 5, pipeDiameter: 4, pumpFlow: 100, safetyFactor: 1.25, reliefTime: 10, resetTime: 1.5 });
 
                 const showAddModal = ref(false);
@@ -1196,6 +1242,12 @@
                             }
                             if (groups.value.length > 0) {
                                 nextGroupId = Math.max(...groups.value.map(g => g.id)) + 1;
+                                // V3.13: Backfill missing part number fields for old data
+                                groups.value.forEach(g => {
+                                    if (!g.partPrefix) g.partPrefix = 'T';
+                                    if (g.partSuffix1 === undefined) g.partSuffix1 = 'S';
+                                    if (g.partSuffix2 === undefined) g.partSuffix2 = '';
+                                });
                             }
                         } catch (e) {
                             console.error('Failed to load save data', e);
@@ -1402,12 +1454,57 @@
                     selectedPointIds.value = [];
                 };
 
-                const addGroup = () => groups.value.push({ id: nextGroupId++, name: `Group ${String.fromCharCode(65 + groups.value.length)}`, slots: [null], isEditing: false });
+                const addGroup = () => groups.value.push({ id: nextGroupId++, name: `Group ${String.fromCharCode(65 + groups.value.length)}`, slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'S', partSuffix2: '' });
                 const removeGroup = (index) => groups.value.splice(index, 1);
                 const addSlot = (i) => groups.value[i].slots.push(null);
                 const removeLastSlot = (i) => { if (groups.value[i].slots.length > 1) groups.value[i].slots.splice(groups.value[i].slots.length - 1, 1); };
                 const deleteSlot = (gIndex, sIndex) => { groups.value[gIndex].slots.splice(sIndex, 1); };
                 const moveSlot = (gIndex, sIndex, dir) => { const grp = groups.value[gIndex]; const nIdx = sIndex + dir; if (nIdx >= 0 && nIdx < grp.slots.length) { [grp.slots[sIndex], grp.slots[nIdx]] = [grp.slots[nIdx], grp.slots[sIndex]]; } };
+
+                // V3.13: Copy Part Number Logic (Final Robust Version)
+                const copyPartNumber = async (group, groupRes) => {
+                    const prefix = group.partPrefix || 'T';
+                    const slotCount = group.slots.length;
+                    const size = prefix === 'T' ? slotCount * 100 : slotCount;
+                    const specCode = groupRes.items.map(i => i.code).join('');
+                    const s1 = group.partSuffix1 || '';
+                    const s2 = group.partSuffix2 || '';
+
+                    const partNum = `${prefix}-${size}-A-${specCode}-${s1}${s2}`;
+
+                    try {
+                        if (navigator.clipboard) {
+                            await navigator.clipboard.writeText(partNum);
+                            alert(`已複製件號：\n${partNum}`);
+                        } else {
+                            throw new Error('Clipboard API unavailable');
+                        }
+                    } catch (err) {
+                        console.warn('Clipboard API failed, trying fallback...', err);
+                        try {
+                            const textArea = document.createElement("textarea");
+                            textArea.value = partNum;
+                            // Ensure it's not visible but part of DOM
+                            textArea.style.position = "fixed";
+                            textArea.style.left = "0";
+                            textArea.style.top = "0";
+                            textArea.style.opacity = "0";
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            const successful = document.execCommand('copy');
+                            document.body.removeChild(textArea);
+
+                            if (successful) {
+                                alert(`已複製件號：\n${partNum}`);
+                            } else {
+                                throw new Error('Fallback failed');
+                            }
+                        } catch (fallbackErr) {
+                            prompt("複製失敗，請手動複製以下內容：", partNum);
+                        }
+                    }
+                };
 
                 const systemMinQ = computed(() => {
                     let min = Infinity; let found = false;
@@ -1783,7 +1880,7 @@
                     availablePointsForEdit, addChildToGroup, removeChildFromGroup, selectedPointToAddId,
                     // V3.8 new exports
                     showEditPointModal, editingPointData, editCurrentType, saveEditPoint,
-                    resetAllData
+                    resetAllData, copyPartNumber
                 };
             }
         }).mount('#app');
