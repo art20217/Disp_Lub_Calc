@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130">
+  <defs>
+    <clipPath id="hatch-clip">
+      <path d="M 15 60 H 42 L 27 80 H 103 L 88 60 H 115 V 115 H 15 Z" stroke="#ffffff" stroke-width="2" fill="none"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Top Part (Male Dovetail) -->
+  <path d="M 15 10 H 115 V 50 H 80 L 95 70 H 35 L 50 50 H 15 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Bottom Part (Female Dovetail) Outline -->
+  <path d="M 15 60 H 42 L 27 80 H 103 L 88 60 H 115 V 115 H 15 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Cross Hatching -->
+  <g clip-path="url(#hatch-clip)" stroke="#000000" stroke-width="1">
+    <!-- Diagonal / -->
+    <line x1="-10" y1="130" x2="60" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="10" y1="130" x2="80" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="30" y1="130" x2="100" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="50" y1="130" x2="120" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="70" y1="130" x2="140" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="90" y1="130" x2="160" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="110" y1="130" x2="180" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/>
+    
+    <!-- Diagonal \ -->
+    <line x1="-10" y1="60" x2="60" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="10" y1="60" x2="80" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="30" y1="60" x2="100" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="50" y1="60" x2="120" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="70" y1="60" x2="140" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="90" y1="60" x2="160" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <line x1="110" y1="60" x2="180" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/>
+  </g>
+</svg>

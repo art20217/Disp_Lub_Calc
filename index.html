@@ -35,6 +35,7 @@
             font-size: 0.95rem;
             color: #f3f4f6;
             transition: all 0.2s;
+            color-scheme: dark;
         }
 
         .input-field:focus {
@@ -67,17 +68,27 @@
             color: #9ca3af;
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+        /* Global Dark Scrollbar */
+        /* Global Dark Scrollbar */
+        /* Global Dark Scrollbar */
+        html *::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
         }
 
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
+        ::-webkit-scrollbar-track {
             background: #1f2937;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 5px;
+            border: 2px solid #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
         }
 
         /* Tooltip adjusted to right-bottom alignment relative to icon */
@@ -136,6 +147,11 @@
         .modal-enter-from,
         .modal-leave-to {
             opacity: 0;
+        }
+
+        select option {
+            background-color: #1f2937;
+            color: #f3f4f6;
         }
 
         select option {
@@ -731,10 +747,10 @@
             </div>
         </transition>
 
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="flex flex-col md:flex-row gap-6 h-[780px]">
 
-            <div class="md:col-span-4 space-y-6">
-                <div class="card relative flex flex-col h-[800px] border-t-4 border-green-600 bg-gray-800">
+            <div class="md:w-[30%] shrink-0 space-y-6">
+                <div class="card relative flex flex-col h-full border-t-4 border-green-600 bg-gray-800">
                     <div class="flex justify-between items-start mb-4 flex-shrink-0">
                         <h2 class="text-lg font-bold text-white flex items-center">
                             <span
@@ -833,7 +849,7 @@
                 </div>
             </div>
 
-            <div class="md:col-span-5 space-y-6">
+            <div class="flex-1 min-w-0 space-y-6">
                 <div class="card border-t-4 border-purple-600 h-full flex flex-col bg-gray-900">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-white flex items-center">
@@ -841,18 +857,30 @@
                                 class="bg-purple-900/50 text-purple-400 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-purple-800">3</span>
                             分配器編組
                         </h2>
-                        <button @click="addGroup"
-                            class="text-sm bg-purple-700 text-white px-3 py-1.5 rounded hover:bg-purple-600 transition font-bold shadow-sm border border-purple-800">
-                            <i class="fas fa-plus mr-1"></i> 新增分配器組
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button @click="toggleAllFold"
+                                class="w-8 h-8 rounded bg-purple-900/50 hover:bg-purple-800 text-purple-300 border border-purple-800 flex items-center justify-center transition shadow-sm"
+                                title="全部摺疊/展開">
+                                <span class="w-5 h-5 flex items-center justify-center"
+                                    v-html="'<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 512 512\' class=\'w-full h-full\'><defs><style>.arrow-line{fill:none;stroke:currentColor;stroke-width:24;stroke-linecap:round;stroke-linejoin:round;}</style></defs><line class=\'arrow-line\' x1=\'156\' y1=\'64\' x2=\'356\' y2=\'64\'/><polyline class=\'arrow-line\' points=\'176,164 256,84 336,164\'/><line class=\'arrow-line\' x1=\'256\' y1=\'84\' x2=\'256\' y2=\'224\'/><line class=\'arrow-line\' x1=\'156\' y1=\'448\' x2=\'356\' y2=\'448\'/><polyline class=\'arrow-line\' points=\'176,348 256,428 336,348\'/><line class=\'arrow-line\' x1=\'256\' y1=\'428\' x2=\'256\' y2=\'288\'/></svg>'"></span>
+                            </button>
+                            <button @click="addGroup"
+                                class="text-sm bg-purple-700 text-white px-3 py-1.5 rounded hover:bg-purple-600 transition font-bold shadow-sm border border-purple-800">
+                                <i class="fas fa-plus mr-1"></i> 新增分配器組
+                            </button>
+                        </div>
                     </div>
                     <div class="space-y-5 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                         <div v-for="(groupRes, gIndex) in allGroupResults" :key="groups[gIndex].id"
                             class="border border-gray-700 rounded-xl bg-gray-800 shadow-sm overflow-hidden">
                             <div
                                 class="bg-gray-900 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
-                                <div class="flex items-center space-x-2 flex-1"><i
-                                        class="fa-solid fa-layer-group text-purple-500"></i>
+                                <div class="flex items-center space-x-2 flex-1">
+                                    <button @click="groups[gIndex].isCollapsed = !groups[gIndex].isCollapsed"
+                                        class="text-purple-400 hover:text-white transition w-5 text-center">
+                                        <i
+                                            :class="['fas', groups[gIndex].isCollapsed ? 'fa-caret-right' : 'fa-caret-down']"></i>
+                                    </button>
                                     <div v-if="!groups[gIndex].isEditing" class="font-bold text-gray-200 cursor-pointer"
                                         @click="groups[gIndex].isEditing = true">{{ groups[gIndex].name }}</div><input
                                         v-else v-model="groups[gIndex].name" @blur="groups[gIndex].isEditing = false"
@@ -876,7 +904,7 @@
                                         title="刪除整組"></i>
                                 </div>
                             </div>
-                            <div class="p-4">
+                            <div class="p-4" v-show="!groups[gIndex].isCollapsed">
                                 <div class="space-y-3 mb-5">
                                     <div v-for="(slotId, sIndex) in groups[gIndex].slots" :key="sIndex"
                                         class="flex items-center space-x-3 group/slot">
@@ -943,60 +971,60 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Part Number Editor (V3.13) -->
-                                <div class="mt-4 pt-4 border-t border-gray-700">
-                                    <div class="flex items-end space-x-2">
-                                        <!-- 1. 型號 (Prefix) -->
-                                        <div class="flex-1">
-                                            <label
-                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">型號</label>
-                                            <select v-model="groups[gIndex].partPrefix"
-                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
-                                                <option value="T">T</option>
-                                                <option value="CDB">CDB</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- 2. 入油口 (Suffix 1) -->
-                                        <div class="flex-1">
-                                            <label
-                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">入油口</label>
-                                            <select v-model="groups[gIndex].partSuffix1"
-                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
-                                                <option value="">無</option>
-                                                <option value="S">S</option>
-                                                <option value="G">G</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- 3. 出油口 (Suffix 2) -->
-                                        <div class="flex-1">
-                                            <label
-                                                class="text-[10px] uppercase font-bold text-gray-400 block mb-1">出油口</label>
-                                            <select v-model="groups[gIndex].partSuffix2"
-                                                class="input-field py-1 text-sm text-center font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
-                                                <option value="">無</option>
-                                                <option value="S">S</option>
-                                                <option value="G">G</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Copy Button -->
-                                        <button @click="copyPartNumber(groups[gIndex], groupRes)"
-                                            class="bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-1.5 h-[32px] flex items-center justify-center transition shadow-sm border border-indigo-700 ml-2 font-bold text-sm"
-                                            title="複製件號">
-                                            <i class="fas fa-copy mr-1"></i> 複製
-                                        </button>
+                            </div>
+                            <!-- Part Number Editor (Always Visible, Footer Style) -->
+                            <div class="p-4 border-t border-gray-700 bg-gray-800">
+                                <div class="flex items-end space-x-2">
+                                    <!-- 1. 型號 (Prefix) -->
+                                    <div class="shrink-0" style="width: 70px; flex: none;">
+                                        <label class="text-xs font-bold text-gray-400 block mb-1">型號</label>
+                                        <select v-model="groups[gIndex].partPrefix"
+                                            class="input-field py-1 text-sm text-left pl-3 font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                            <option value="T">T</option>
+                                            <option value="CDB">CDB</option>
+                                        </select>
                                     </div>
+
+                                    <!-- 2. 左側入油口 (Suffix 1) -->
+                                    <div class="flex-1">
+                                        <label class="text-xs font-bold text-gray-400 block mb-1">左側入油口</label>
+                                        <select v-model="groups[gIndex].partSuffix1"
+                                            class="input-field py-1 text-sm text-left pl-3 font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                            <option value="A">A：套管、套管帽 Ø6</option>
+                                            <option value="G">G：塞頭</option>
+                                            <option value="X">X：不組配</option>
+                                            <option value="S">S：其他規格請註明</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- 3. 右側入油口 (Suffix 2) -->
+                                    <div class="flex-1">
+                                        <label class="text-xs font-bold text-gray-400 block mb-1">右側入油口</label>
+                                        <select v-model="groups[gIndex].partSuffix2"
+                                            class="input-field py-1 text-sm text-left pl-3 font-mono font-bold bg-gray-900 border-gray-600 focus:border-indigo-500">
+                                            <option value="A">A：套管、套管帽 Ø6</option>
+                                            <option value="G">G：塞頭</option>
+                                            <option value="X">X：不組配</option>
+                                            <option value="S">S：其他規格請註明</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Copy Button -->
+                                    <button @click="copyPartNumber(groups[gIndex], groupRes)"
+                                        class="bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-1.5 h-[32px] flex items-center justify-center transition shadow-sm border border-indigo-700 ml-2 font-bold text-sm"
+                                        title="複製件號">
+                                        <i class="fas fa-copy mr-1"></i> 複製
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div v-if="groups.length === 0" class="text-center text-gray-500 py-12">點擊上方按鈕新增第一組分配器</div>
                     </div>
+                    <div v-if="groups.length === 0" class="text-center text-gray-500 py-12">點擊上方按鈕新增第一組分配器</div>
                 </div>
             </div>
 
-            <div class="md:col-span-3 space-y-6">
+
+            <div class="md:w-[25%] shrink-0 space-y-6">
                 <div class="card border-t-4 border-orange-600 bg-gray-800">
                     <h2 class="text-lg font-bold mb-4 text-white flex items-center">
                         <span
@@ -1174,21 +1202,944 @@
 
         const LUBRICATION_TYPES = [
             { id: 'ball_bearing', name: '滾珠軸承', svg: `<svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg"><g stroke="#FFFFFF" stroke-width="2" fill="none"><circle cx="65" cy="65" r="60" /><circle cx="65" cy="65" r="52" /><circle cx="65" cy="65" r="36" /><circle cx="65" cy="65" r="28" /><circle cx="65" cy="21" r="7.5" /><circle cx="96.11" cy="33.89" r="7.5" /><circle cx="109" cy="65" r="7.5" /><circle cx="96.11" cy="96.11" r="7.5" /><circle cx="65" cy="109" r="7.5" /><circle cx="33.89" cy="96.11" r="7.5" /><circle cx="21" cy="65" r="7.5" /><circle cx="33.89" cy="33.89" r="7.5" /></g></svg>`, formulaStr: 'Q = 0.04 × 直徑 × 列數 × K', fields: { dim1: { label: '直徑' }, qty: { label: '列數' } }, calc: (d1, d2, qty, k) => 0.04 * (d1 / 10) * qty * k },
-            { id: 'moving_bearing', name: '滑動軸承', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="12" cy="12" r="7" /><path d="M3 3 l18 18" opacity="0.2"/><path d="M21 3 l-18 18" opacity="0.2"/></svg>', formulaStr: 'Q = 0.023 × 直徑 × 長度 × K', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k) => 0.023 * (d1 / 10) * (d2 / 10) * k },
-            { id: 'plane_slide', name: '平面滑動', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="8" rx="1"/><rect x="2" y="16" width="20" height="4"/><path d="M4 16l-2 4M8 16l-2 4M12 16l-2 4M16 16l-2 4M20 16l-2 4M24 17l-1 3"/></svg>', hasDirection: true, formulaStr: '水平: 0.0017×A×K / 垂直: 0.006×A×K (A=長×寬)', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * (d2 / 10); return (dir === 'vertical' ? 0.006 : 0.0017) * area * k; } },
-            { id: 'circle_track', name: '圓筒滑動軌道', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130" data-edited="true"><defs><clipPath id="grid-clip"><path d="M65,65 m-35,0 a35,35 0 1,0 70,0 a35,35 0 1,0 -70,0 z M65,65 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0 z" fill-rule="evenodd" stroke="#000000" stroke-width="2" fill="none"/></clipPath></defs><g stroke="#000000" stroke-width="1.5" fill="none"><circle cx="65" cy="65" r="15" stroke="#000000" stroke-width="2" fill="none"/><circle cx="65" cy="65" r="35" stroke="#000000" stroke-width="2" fill="none"/><g clip-path="url(#grid-clip)"><path d="M20,20 L110,110 M40,20 L110,90 M60,20 L110,70 M80,20 L110,50 M20,40 L90,110 M20,60 L70,110 M20,80 L50,110 M110,20 L20,110 M90,20 L20,90 M70,20 L20,70 M50,20 L20,50 M110,40 L40,110 M110,60 L60,110 M110,80 L80,110" stroke="#000000" stroke-width="2" fill="none"/></g><path d="M15,58 L15,15 L115,15 L115,58 L99.29,58 A35,35 0 0,0 30.71,58 L15,58 Z" stroke="#000000" stroke-width="2" fill="none"/><path d="M15,72 L30.71,72 A35,35 0 0,0 99.29,72 L115,72 L115,115 L15,115 Z" stroke="#000000" stroke-width="2" fill="none"/></g></svg>', hasDirection: true, formulaStr: '水平: 0.023×A×K / 垂直: 0.07×A×K (A=直徑×π×長)', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * 3.14 * (d2 / 10); return (dir === 'vertical' ? 0.07 : 0.023) * area * k; } },
-            { id: 'linear_track', name: '線性滑軌', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16v-3h-4v-5h4l-8-8-8 8h4v5h-4z"/><line x1="12" y1="2" x2="12" y2="22"/></svg>', formulaStr: 'Q = 0.012 × 長度 × 列數 × K', fields: { dim1: { label: '長度' }, qty: { label: '列數' } }, calc: (d1, d2, qty, k) => 0.012 * (d1 / 10) * qty * k },
-            { id: 'cam', name: '凸輪', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" /><path d="M12 9c0-4 4-6 4-6s-4-2-4-2-4 2-4 2 4 2 4 6z"/><circle cx="12" cy="15" r="2" /></svg>', formulaStr: 'Q = 0.013 × 圓周 × 寬度 × K', fields: { dim1: { label: '圓周' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.013 * (d1 / 10) * (d2 / 10) * k },
+            { id: 'moving_bearing', name: '滑動軸承', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><path d="M 5 5 H 125 V 55 H 104 A 40.3 40.3 0 0 0 26 55 H 5 Z" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M 5 125 H 125 V 75 H 104 A 40.3 40.3 0 0 1 26 75 H 5 Z" fill="none" stroke="#ffffff" stroke-width="2"/><circle cx="65" cy="65" r="36" fill="none" stroke="#ffffff" stroke-width="2"/><circle cx="65" cy="65" r="13" fill="none" stroke="#ffffff" stroke-width="2"/><line x1="30.1" y1="56.1" x2="73.9" y2="99.9" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="56.1" y1="30.1" x2="99.9" y2="73.9" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="30.1" y1="73.9" x2="73.9" y2="30.1" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="56.1" y1="99.9" x2="99.9" y2="56.1" stroke="#ffffff" stroke-width="2" fill="none"/></svg>', formulaStr: 'Q = 0.023 × 直徑 × 長度 × K', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k) => 0.023 * (d1 / 10) * (d2 / 10) * k },
+            { id: 'plane_slide', name: '平面滑動', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><defs><clipPath id="hatch-clip"><path d="M 15 60 H 42 L 27 80 H 103 L 88 60 H 115 V 115 H 15 Z" stroke="#ffffff" stroke-width="2" fill="none"/></clipPath></defs><!-- Top Part (Male Dovetail) --><path d="M 15 10 H 115 V 50 H 80 L 95 70 H 35 L 50 50 H 15 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/><!-- Bottom Part (Female Dovetail) Outline --><path d="M 15 60 H 42 L 27 80 H 103 L 88 60 H 115 V 115 H 15 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/><!-- Cross Hatching --><g clip-path="url(#hatch-clip)" stroke="#000000" stroke-width="1"><!-- Diagonal / --><line x1="-10" y1="130" x2="60" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="10" y1="130" x2="80" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="30" y1="130" x2="100" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="50" y1="130" x2="120" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="70" y1="130" x2="140" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="90" y1="130" x2="160" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="110" y1="130" x2="180" y2="60" stroke="#ffffff" stroke-width="2" fill="none"/><!-- Diagonal \ --><line x1="-10" y1="60" x2="60" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="10" y1="60" x2="80" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="30" y1="60" x2="100" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="50" y1="60" x2="120" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="70" y1="60" x2="140" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="90" y1="60" x2="160" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/><line x1="110" y1="60" x2="180" y2="130" stroke="#ffffff" stroke-width="2" fill="none"/></g></svg>', hasDirection: true, formulaStr: '水平: 0.0017×A×K / 垂直: 0.006×A×K (A=長×寬)', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * (d2 / 10); return (dir === 'vertical' ? 0.006 : 0.0017) * area * k; } },
+            { id: 'circle_track', name: '圓筒滑動軌道', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><defs><clipPath id="mesh-clip"><circle cx="65" cy="65" r="28" stroke="#ffffff" stroke-width="2" fill="none"/></clipPath></defs><circle cx="65" cy="65" r="60" fill="none" stroke="#ffffff" stroke-width="2"/><circle cx="65" cy="65" r="32" fill="none" stroke="#ffffff" stroke-width="2"/><circle cx="65" cy="65" r="28" fill="none" stroke="#ffffff" stroke-width="2"/><g clip-path="url(#mesh-clip)" stroke="#000000" stroke-width="1.5" fill="none"><g transform="rotate(45 65 65)"><path d="M40,0 L40,130 M50,0 L50,130 M60,0 L60,130 M70,0 L70,130 M80,0 L80,130 M90,0 L90,130" stroke="#ffffff" stroke-width="2" fill="none"/><path d="M0,40 L130,40 M0,50 L130,50 M0,60 L130,60 M0,70 L130,70 M0,80 L130,80 M0,90 L130,90" stroke="#ffffff" stroke-width="2" fill="none"/></g></g></svg>', hasDirection: true, formulaStr: '水平: 0.023×A×K / 垂直: 0.07×A×K (A=直徑×π×長)', fields: { dim1: { label: '直徑' }, dim2: { label: '長度' } }, calc: (d1, d2, qty, k, dir) => { const area = (d1 / 10) * 3.14 * (d2 / 10); return (dir === 'vertical' ? 0.07 : 0.023) * area * k; } },
+            { id: 'linear_track', name: '線性滑軌', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><path d="M10,58 L10,10 L120,10 L120,58 L108,58 L108,40 L22,40 L22,58 Z" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/><circle cx="41" cy="52" r="12" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M32.5,43.5 L49.5,60.5 M32.5,60.5 L49.5,43.5" stroke="#ffffff" stroke-width="2" fill="none"/><circle cx="65" cy="52" r="12" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M56.5,43.5 L73.5,60.5 M56.5,60.5 L73.5,43.5" stroke="#ffffff" stroke-width="2" fill="none"/><circle cx="89" cy="52" r="12" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M80.5,43.5 L97.5,60.5 M80.5,60.5 L97.5,43.5" stroke="#ffffff" stroke-width="2" fill="none"/><rect x="10" y="64" width="110" height="40" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M10,104 L50,64 M20,104 L60,64 M30,104 L70,64 M40,104 L80,64 M50,104 L90,64 M60,104 L100,64 M70,104 L110,64 M80,104 L120,64 M90,104 L120,74 M100,104 L120,84 M110,104 L120,94 M10,94 L40,64 M10,84 L30,64 M10,74 L20,64 M10,64 L50,104 M20,64 L60,104 M30,64 L70,104 M40,64 L80,104 M50,64 L90,104 M60,64 L100,104 M70,64 L110,104 M80,64 L120,104 M90,64 L120,94 M100,64 L120,84 M110,64 L120,74 M10,74 L40,104 M10,84 L30,104 M10,94 L20,104" stroke="#ffffff" stroke-width="2" fill="none"/></svg>', formulaStr: 'Q = 0.012 × 長度 × 列數 × K', fields: { dim1: { label: '長度' }, qty: { label: '列數' } }, calc: (d1, d2, qty, k) => 0.012 * (d1 / 10) * qty * k },
+            { id: 'cam', name: '凸輪', svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><defs><pattern id="cam-crossHatch-v2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="20" stroke="#ffffff" stroke-width="2" /><line x1="0" y1="0" x2="20" y2="0" stroke="#ffffff" stroke-width="2" /></pattern></defs><g id="washer" transform="translate(104.1, 131.5)"><circle r="55" fill="none" stroke="#ffffff" stroke-width="4" /><circle r="25" fill="none" stroke="#ffffff" stroke-width="4" /></g><g id="cam-link" transform="translate(200, 150)"><path d="
+            M -24.47 -97.12 
+            A 25 25 0 0 1 24.47 -97.12 
+            L 48.94 19.76 
+            A 50 50 0 1 1 -48.94 19.76 
+            Z" 
+            fill="url(#cam-crossHatch-v2)" 
+            stroke="#ffffff" 
+            stroke-width="5" 
+            stroke-linejoin="round"
+        /><circle cx="0" cy="30" r="28" fill="#FFFFFF" stroke="#ffffff" stroke-width="4" /></g></svg>`, formulaStr: 'Q = 0.013 × 圓周 × 寬度 × K', fields: { dim1: { label: '圓周' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.013 * (d1 / 10) * (d2 / 10) * k },
             {
                 id: 'gear',
                 name: '齒輪',
                 // V3.11: New Gear Icon (Dual Gears)
-                svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.9 14.3l.4 2.8m-2.8-.4l2.8.4m-2.8-6l-.4-2.8m2.8.4l-2.8-.4m-6 2.8l-.4 2.8m2.8-.4l-2.8.4m2.8-6l.4-2.8m-2.8.4l2.8-.4"/><circle cx="15" cy="15" r="3"/><circle cx="9" cy="9" r="3"/><path d="M15 12a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3m-3-3a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3"/></svg>',
+                svg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 1024 1024" xml:space="preserve"><path fill="#ffffff" opacity="1.000000" stroke="none" 
+	d="
+M419.559265,408.283936 
+	C428.856384,411.189056 437.607269,414.420685 446.069244,418.367004 
+	C449.125702,419.792389 451.102936,419.284546 453.393829,416.723907 
+	C463.501190,405.426483 473.921204,394.408905 484.037567,383.119324 
+	C487.569672,379.177582 490.843689,378.238922 495.724335,381.003998 
+	C511.737427,390.076019 526.584900,400.715240 540.500183,412.727753 
+	C544.014771,415.761810 544.378235,418.820862 542.206970,422.821716 
+	C536.903625,432.593658 531.833008,442.491913 527.284973,452.806274 
+	C534.224182,444.456665 541.145081,436.091644 548.116577,427.769104 
+	C549.690247,425.890503 549.200989,424.070587 548.282288,422.203156 
+	C543.169800,411.811249 539.981079,400.782196 537.760193,389.480438 
+	C536.979858,385.509521 533.946289,385.191467 531.147705,384.494598 
+	C519.847473,381.680634 508.506104,379.032349 497.187439,376.291901 
+	C487.958557,374.057373 486.820343,372.762909 486.748474,363.426117 
+	C486.669006,353.095398 486.658722,342.759491 486.899994,332.432434 
+	C487.093994,324.129028 488.126129,323.100220 496.061462,321.379578 
+	C508.257202,318.735199 520.448364,316.068329 532.662476,313.511475 
+	C535.710632,312.873383 537.714417,311.649841 538.309998,308.262268 
+	C540.163574,297.719299 543.715332,287.663666 547.777344,277.804443 
+	C549.199280,274.353088 548.465759,272.005463 545.964050,269.351990 
+	C537.166382,260.020813 528.709778,250.368042 519.908936,241.039932 
+	C516.185974,237.093964 515.958984,233.424438 518.854370,228.979874 
+	C525.496582,218.783691 532.492798,208.847397 539.710022,199.051483 
+	C542.932068,194.678238 546.461487,193.800110 551.351624,196.075821 
+	C562.827515,201.416321 574.471619,206.396698 585.922668,211.788391 
+	C589.540588,213.491882 592.325073,213.551636 595.314697,210.662888 
+	C603.022034,203.215515 611.993225,197.393906 620.882263,191.510880 
+	C624.114929,189.371460 624.883972,186.962067 624.359070,183.142410 
+	C622.570679,170.126801 621.287842,157.042618 619.675415,144.001495 
+	C618.996033,138.507309 620.990173,135.437378 626.425842,133.638062 
+	C637.327881,130.029297 648.053894,125.889030 659.126221,122.780777 
+	C665.841858,120.895538 667.608276,121.565392 670.894470,127.514854 
+	C677.175293,138.885834 683.588745,150.188629 689.595215,161.703339 
+	C691.838257,166.003494 694.632141,167.038986 699.253235,166.439117 
+	C709.682495,165.085327 720.220398,165.094803 730.641418,166.441849 
+	C736.007202,167.135452 739.167114,165.947784 741.733887,160.830643 
+	C747.256714,149.819931 753.464844,139.150558 759.476501,128.388382 
+	C763.314880,121.516869 764.618713,121.115440 772.350586,123.118904 
+	C783.652405,126.047394 794.529663,130.266632 805.611511,133.863052 
+	C809.805725,135.224243 812.043884,137.620316 811.426758,142.331223 
+	C809.786011,154.856613 808.466003,167.426514 806.652832,179.925690 
+	C805.869263,185.326431 806.245605,189.196152 811.791443,192.303879 
+	C820.652588,197.269485 828.650146,203.676514 836.080811,210.632156 
+	C839.022766,213.386154 841.537476,213.480652 844.963135,211.876709 
+	C856.274109,206.580750 867.706360,201.544586 879.057434,196.333313 
+	C885.608154,193.325912 887.576111,193.782852 891.780396,199.353363 
+	C898.916016,208.807571 905.302734,218.762421 911.572449,228.794052 
+	C915.356628,234.848648 915.197144,236.205505 910.525269,241.527313 
+	C902.063965,251.165756 893.659241,260.855652 885.066223,270.375427 
+	C882.835022,272.847260 882.613281,274.941223 883.899109,277.968842 
+	C887.939880,287.483459 890.929016,297.378815 893.177856,307.457581 
+	C893.995605,311.122559 895.773132,312.564758 899.390991,313.295746 
+	C911.950317,315.833466 924.406189,318.880096 936.951111,321.494476 
+	C942.085205,322.564362 944.147278,325.463043 944.357666,330.525024 
+	C944.855469,342.502625 945.492798,354.439636 944.507080,366.456512 
+	C944.086792,371.580261 942.093262,373.949158 937.430603,375.099518 
+	C924.666687,378.248474 911.965515,381.654266 899.185852,384.735413 
+	C896.035706,385.494904 894.573425,386.723572 893.920166,390.135620 
+	C891.941772,400.467804 888.210510,410.320923 884.189697,420.005127 
+	C882.660767,423.687775 883.333740,426.098053 885.796082,428.929962 
+	C893.775513,438.107086 901.532410,447.477722 909.375427,456.773468 
+	C914.995605,463.434692 915.082397,464.491364 910.432190,471.580536 
+	C904.123108,481.198578 897.375671,490.506256 890.219788,499.506226 
+	C885.838318,505.016724 884.134949,505.325531 877.835876,502.573822 
+	C866.542175,497.640289 855.198547,492.815125 843.996033,487.682098 
+	C840.276184,485.977661 837.627197,486.335358 834.635376,489.195618 
+	C827.145081,496.356445 818.737976,502.393707 809.826111,507.656372 
+	C806.896057,509.386658 806.340088,511.255188 806.693787,514.561462 
+	C808.125732,527.946289 810.606445,541.205078 811.409302,554.665833 
+	C811.652283,558.739197 810.181396,561.142700 806.344482,562.712952 
+	C793.371521,568.022461 780.014709,572.106689 766.524353,575.824585 
+	C762.066223,577.053223 759.616760,574.940735 757.802856,571.237610 
+	C752.087280,559.569031 746.168091,547.997009 740.647583,536.237488 
+	C738.596252,531.868042 736.356750,530.196228 731.107483,530.888550 
+	C721.054749,532.214600 710.827148,532.497803 700.742737,530.648682 
+	C697.323181,530.021606 695.541992,531.182739 694.100769,534.200256 
+	C688.646179,545.620117 683.007019,556.951843 677.432861,568.314514 
+	C673.307617,576.723816 672.267578,576.971008 663.068054,574.454224 
+	C651.024353,571.159302 639.365601,566.700684 626.991211,562.656677 
+	C626.525269,568.553101 622.037292,570.152222 617.851807,572.137573 
+	C604.759460,578.347717 591.746643,584.729492 578.575378,590.766296 
+	C575.071533,592.372192 574.042969,594.250183 574.601746,598.055603 
+	C576.716919,612.461609 576.562134,626.953796 574.850159,641.375061 
+	C574.413635,645.051819 575.195984,646.835144 578.495605,648.320190 
+	C592.468140,654.608643 606.324158,661.155273 620.272827,667.497437 
+	C627.803162,670.921204 628.354980,672.100220 626.422180,680.124146 
+	C622.397278,696.833252 617.144409,713.137085 610.550110,729.000244 
+	C607.128113,737.232117 606.107239,737.579407 597.341919,735.750122 
+	C582.844238,732.724487 568.297974,729.928040 553.825378,726.789734 
+	C550.562866,726.082214 548.910706,727.095337 547.393311,729.768616 
+	C540.385498,742.114380 532.539246,753.895386 522.870422,764.344177 
+	C520.541138,766.861389 520.495605,768.740845 522.295898,771.718506 
+	C530.654541,785.543884 538.737854,799.536438 546.847900,813.510803 
+	C549.812805,818.619629 549.366028,820.822510 544.861877,824.803955 
+	C531.226501,836.856934 516.647156,847.650024 501.263947,857.363525 
+	C496.256897,860.525146 493.530365,860.251465 489.397919,855.940247 
+	C478.329437,844.392883 467.253479,832.851135 456.327393,821.169739 
+	C453.744873,818.408630 451.480682,817.981506 448.051605,819.667725 
+	C435.310486,825.933105 421.944672,830.599670 408.184418,834.046509 
+	C404.756409,834.905273 403.125916,836.466125 402.761108,840.005310 
+	C401.379944,853.404419 399.800873,866.783142 398.308960,880.170898 
+	C398.216949,880.996765 398.263611,881.836975 398.202911,882.667419 
+	C397.463989,892.779907 395.900604,894.322632 385.916779,895.175354 
+	C369.109955,896.610779 352.306793,896.531311 335.502411,895.186523 
+	C328.133545,894.596863 326.551971,892.783813 325.603790,885.430359 
+	C323.690063,870.588989 321.529907,855.779480 319.475098,840.956238 
+	C319.024933,837.708740 317.681793,835.896851 314.011993,835.028503 
+	C299.411407,831.573975 285.126038,826.999207 271.494415,820.658447 
+	C268.112335,819.085266 266.182281,819.821106 263.829559,822.471313 
+	C253.544571,834.057129 243.061005,845.467041 232.616776,856.910828 
+	C228.400650,861.530579 226.185349,861.924255 220.884293,858.654480 
+	C205.554642,849.199097 190.672592,839.098450 176.857483,827.497742 
+	C171.826080,823.272766 171.365585,821.488098 174.566086,815.488403 
+	C181.386948,802.701965 188.206848,789.909241 195.368622,777.313293 
+	C197.813599,773.013062 197.701233,770.123535 194.055145,766.487488 
+	C183.618958,756.080261 175.271423,743.987610 167.718979,731.390259 
+	C165.548416,727.769836 163.183777,726.679932 159.153137,727.630981 
+	C144.573380,731.070862 129.904129,734.137695 115.356140,737.702332 
+	C110.510391,738.889648 107.752312,737.414246 105.744324,733.168640 
+	C97.374962,715.472351 91.591232,696.901672 86.924049,677.949585 
+	C85.667564,672.847412 89.034470,670.771484 92.892731,668.992249 
+	C106.354294,662.784424 119.735413,656.396667 133.284760,650.387695 
+	C137.640640,648.456055 139.619278,646.332153 138.839188,641.113586 
+	C136.661652,626.546936 137.221252,611.875610 138.855682,597.280029 
+	C139.228287,593.952820 138.085220,592.542419 135.278809,591.281433 
+	C121.452942,585.068970 107.715874,578.659302 93.918289,572.383362 
+	C86.770485,569.132080 86.148155,567.992188 87.867096,560.559387 
+	C91.740196,543.811768 97.027847,527.528259 103.763069,511.711609 
+	C107.363861,503.255707 108.470512,502.641602 117.333397,504.525482 
+	C131.655441,507.569733 146.004623,510.495361 160.278671,513.750244 
+	C163.862640,514.567505 165.586960,513.691162 167.334442,510.501129 
+	C174.720230,497.018250 183.314499,484.336182 194.022858,473.229431 
+	C196.479370,470.681519 196.280014,468.615112 194.657867,465.752045 
+	C187.021179,452.273468 179.543991,438.704132 172.066971,425.135712 
+	C167.673233,417.162476 167.856079,416.258087 174.828720,410.562286 
+	C188.404434,399.472626 203.026138,389.885345 217.833862,380.550873 
+	C221.830383,378.031586 224.818085,378.648529 227.902878,381.999969 
+	C238.281723,393.275757 248.889343,404.342804 259.164703,415.710938 
+	C262.180359,419.047333 264.719360,419.938660 269.041443,417.963501 
+	C282.085907,412.002319 295.613251,407.290253 309.722015,404.501251 
+	C313.867340,403.681824 315.318237,401.404816 315.788757,397.371643 
+	C317.618500,381.687866 319.786530,366.043915 321.748932,350.375122 
+	C322.333282,345.709686 324.741943,343.272003 329.474670,342.874054 
+	C347.771210,341.335632 366.061066,341.179016 384.361603,342.790527 
+	C388.583923,343.162384 390.559601,345.671722 391.096405,349.554596 
+	C393.213287,364.865662 395.396210,380.169342 397.290894,395.508362 
+	C397.913605,400.549774 399.026733,404.187836 405.129272,404.779205 
+	C409.878082,405.239380 414.503601,406.972137 419.559265,408.283936 
+M337.023651,865.710815 
+	C337.467010,869.510315 338.028381,873.300842 338.317902,877.112061 
+	C338.567444,880.396973 340.048950,881.693237 343.403778,881.767944 
+	C355.403381,882.034973 367.394470,882.171570 379.396118,881.777954 
+	C383.017487,881.659241 384.352600,880.036194 384.709320,876.658813 
+	C386.281250,861.775024 388.031799,846.910095 389.616272,832.027649 
+	C390.440430,824.286926 391.034546,823.489197 398.577911,821.790649 
+	C415.876587,817.895386 432.535339,812.198425 448.312317,804.045776 
+	C454.993195,800.593445 456.045319,800.732971 461.238647,806.149658 
+	C471.732635,817.095215 482.346558,827.929688 492.650208,839.051575 
+	C495.725555,842.371155 497.972778,842.886597 501.821716,840.156616 
+	C511.204010,833.501770 520.398438,826.615845 529.518311,819.612915 
+	C532.055481,817.664612 532.252380,816.046936 530.679016,813.377869 
+	C522.896362,800.175781 515.355408,786.831055 507.557159,773.638306 
+	C503.413635,766.628418 503.174530,765.020874 508.634216,759.169983 
+	C520.310364,746.657227 529.915161,732.725159 538.118469,717.751831 
+	C542.022644,710.625610 542.911255,710.392639 550.887878,712.049500 
+	C565.226013,715.027771 579.596802,717.852966 593.905151,720.966370 
+	C596.927307,721.623962 598.493652,721.112427 599.628235,718.149841 
+	C603.797974,707.262146 607.679504,696.298401 610.891174,685.072510 
+	C612.272766,680.243591 610.751221,678.269531 606.506104,676.394287 
+	C592.642334,670.270325 578.972595,663.708801 565.168701,657.446960 
+	C560.658203,655.400818 559.328430,652.413391 560.088501,647.468323 
+	C562.837097,629.585022 562.680176,611.625488 560.181030,593.721497 
+	C559.142639,586.282104 559.751404,584.628540 566.303345,581.505493 
+	C579.836670,575.054626 593.317078,568.489685 606.925293,562.201172 
+	C610.356018,560.615845 611.114685,558.771790 610.152954,555.189880 
+	C607.084106,543.759399 603.462036,532.521057 599.444214,521.395508 
+	C598.281067,518.174805 596.717773,517.172363 593.099182,518.047180 
+	C578.535400,521.568115 563.883667,524.726379 549.256470,527.982971 
+	C542.063599,529.584412 541.239502,529.264771 537.672791,522.863953 
+	C528.725464,506.807007 518.935669,491.370758 506.014038,478.115082 
+	C500.406830,472.362915 500.459015,471.459534 504.382141,464.219543 
+	C511.683075,450.745941 518.862000,437.205322 526.277222,423.795227 
+	C527.820129,421.005005 527.378174,419.396667 525.001831,417.506866 
+	C516.121826,410.445129 506.751709,404.132294 497.201202,398.012482 
+	C492.784027,395.182007 490.362274,396.117279 487.232635,399.636688 
+	C477.268646,410.841614 467.008606,421.782684 456.945496,432.900421 
+	C454.577728,435.516327 452.333893,436.823578 448.723572,435.014679 
+	C430.593140,425.930603 411.472229,419.786621 391.537201,416.106415 
+	C388.121704,415.475891 386.108429,413.542969 385.603516,409.740997 
+	C383.435974,393.419495 380.945526,377.140839 378.785858,360.818359 
+	C378.344666,357.484039 376.901703,356.398468 373.716797,356.052795 
+	C362.045929,354.786072 350.418274,355.722534 338.772003,356.256470 
+	C335.857819,356.390076 334.707428,357.794403 334.357544,360.544189 
+	C332.406250,375.878326 330.307648,391.193787 328.375092,406.530212 
+	C327.428101,414.045319 326.778473,414.851105 319.598480,416.397125 
+	C301.789642,420.231842 284.509552,425.646759 268.127075,433.733856 
+	C261.046509,437.229065 260.241486,437.013763 254.901810,431.240082 
+	C244.719330,420.229950 234.456055,409.294006 224.339386,398.223938 
+	C222.207886,395.891541 220.532425,395.276489 217.579346,397.110596 
+	C207.797531,403.185852 198.544876,409.997589 189.208435,416.703644 
+	C186.237335,418.837677 185.173889,420.787933 187.319855,424.503784 
+	C195.233231,438.206177 202.750580,452.136902 210.468597,465.952850 
+	C212.409576,469.427368 213.221542,472.595642 210.020615,475.931732 
+	C196.204178,490.331635 184.629425,506.371216 175.699188,524.228516 
+	C173.332230,528.961548 170.254166,530.165283 165.222153,528.988525 
+	C151.125015,525.692139 136.898010,522.945496 122.824135,519.558594 
+	C117.877029,518.368042 115.342606,519.266174 113.503754,524.273315 
+	C109.594627,534.917664 106.420715,545.762634 103.245972,556.628235 
+	C102.226639,560.116943 103.238144,561.656372 106.394119,563.077271 
+	C120.367119,569.368591 134.263962,575.831421 148.133133,582.349731 
+	C154.277023,585.237244 154.957581,586.802856 153.790100,593.332336 
+	C150.623520,611.042603 150.591721,628.754517 153.781830,646.464050 
+	C155.183411,654.244690 154.608139,655.647888 147.504669,659.000549 
+	C133.796356,665.470703 120.055962,671.875916 106.250336,678.134766 
+	C102.922386,679.643494 101.857521,681.340576 102.935066,685.072266 
+	C106.266548,696.609802 110.377602,707.852539 114.755928,719.017395 
+	C115.933418,722.019958 117.502556,722.976074 120.845222,722.190491 
+	C135.751404,718.687134 150.739410,715.533264 165.659760,712.088196 
+	C170.051346,711.074158 173.057388,712.245605 175.203400,716.223328 
+	C184.524612,733.501038 196.254822,748.962891 210.103470,762.888367 
+	C215.467285,768.281982 215.365555,769.594482 211.615921,776.506226 
+	C204.863754,788.952759 198.192261,801.446045 191.214905,813.765625 
+	C189.208725,817.307861 189.296478,819.381409 192.652451,822.099854 
+	C201.483582,829.253479 210.937729,835.456116 220.382751,841.717407 
+	C223.862869,844.024475 226.111374,843.640625 228.850082,840.536194 
+	C238.878922,829.168335 249.183624,818.044373 259.284363,806.739197 
+	C262.619598,803.006287 265.818970,802.114258 270.649658,804.559387 
+	C287.827240,813.254272 306.003387,819.218201 324.936859,822.730835 
+	C329.646820,823.604736 331.722473,826.171021 332.289124,830.743225 
+	C333.699341,842.121887 335.314148,853.475159 337.023651,865.710815 
+M673.873352,503.374451 
+	C681.059814,496.187561 688.333923,489.085205 695.388428,481.771027 
+	C698.111572,478.947693 700.103088,478.998169 702.819092,481.781677 
+	C712.706360,491.914825 722.800476,501.845917 732.726013,511.942169 
+	C735.323792,514.584595 737.719727,517.122559 741.818665,517.417603 
+	C744.905151,517.639771 746.593872,520.071960 748.024414,522.669678 
+	C749.939148,526.146729 751.125366,530.040161 754.100342,532.924316 
+	C761.397278,539.998596 768.617676,547.151855 775.881226,554.260742 
+	C780.486084,558.767578 782.750610,558.804016 789.158020,553.666199 
+	C779.344849,544.223694 769.595520,534.922180 759.944763,525.519409 
+	C755.730835,521.413696 755.794250,520.339905 759.924500,516.135620 
+	C769.728638,506.155884 779.510132,496.153076 789.397400,486.256104 
+	C799.235535,476.408325 797.786011,477.418518 806.696350,486.067108 
+	C812.222534,491.430969 813.103577,491.365570 818.015198,485.041443 
+	C817.766785,484.644287 817.573181,484.161957 817.235718,483.822815 
+	C814.650146,481.224487 812.050964,478.639221 809.428467,476.078186 
+	C804.989197,471.742859 804.804138,470.651245 809.083618,466.310883 
+	C820.430481,454.802338 831.941101,443.455475 843.314575,431.972900 
+	C846.215637,429.043945 848.566956,428.761597 851.665588,431.935974 
+	C862.256287,442.785553 873.094055,453.393341 883.778564,464.152008 
+	C889.436890,469.849548 889.339050,470.606201 883.729980,476.181488 
+	C880.497742,479.394470 876.935242,482.345642 874.325439,486.183044 
+	C880.442505,490.468384 880.975830,490.485596 884.774780,485.389709 
+	C888.955566,479.781555 892.888916,473.989319 897.049683,468.365753 
+	C899.079834,465.621918 898.603821,463.628448 895.969238,461.642761 
+	C882.058289,451.158112 871.171082,437.533356 858.640808,425.613647 
+	C855.530457,422.654877 855.623535,420.005737 858.497009,417.099792 
+	C863.299255,412.243256 867.754272,406.981110 872.945862,402.587433 
+	C879.674011,396.893433 881.142944,389.385895 882.344055,380.491150 
+	C880.554749,382.008575 879.383362,382.877258 878.356567,383.892212 
+	C869.471924,392.674377 860.523926,401.395538 851.794189,410.329681 
+	C848.623352,413.574707 846.130005,413.543488 843.004028,410.379913 
+	C832.348206,399.595764 821.547974,388.954376 810.837219,378.224274 
+	C805.109619,372.486450 805.155151,371.115753 811.011414,365.235809 
+	C821.358337,354.846985 831.715759,344.468658 842.060120,334.077240 
+	C846.190063,329.928467 847.338013,329.859314 851.440186,333.952698 
+	C862.055542,344.545258 872.631714,355.177063 883.218872,365.797882 
+	C885.448975,368.035034 887.372803,370.489258 888.293457,374.231995 
+	C894.470825,371.866089 901.354675,372.955536 906.245483,368.259460 
+	C913.212219,361.569855 919.849426,354.537201 926.634583,347.658142 
+	C927.921082,346.353760 929.361816,345.181458 930.516846,343.772339 
+	C932.182312,341.740601 932.425842,334.342163 930.749084,333.416443 
+	C927.021606,331.358429 925.875000,335.216034 924.095825,336.942871 
+	C915.966125,344.833740 908.008057,352.903015 900.058838,360.977509 
+	C897.119812,363.962799 894.398315,363.978363 891.470398,361.026520 
+	C880.205566,349.669861 868.959412,338.293793 857.594421,327.037933 
+	C854.182495,323.658752 854.609863,320.857574 857.828186,317.713165 
+	C862.952209,312.706879 867.929443,307.549774 872.944641,302.432800 
+	C878.125977,297.146179 878.164734,296.417267 873.582092,289.504517 
+	C872.235168,290.760498 870.892273,291.935059 869.636719,293.196503 
+	C863.171143,299.692444 856.694885,306.178375 850.293823,312.737427 
+	C847.837646,315.254150 845.657410,315.462860 843.082825,312.846771 
+	C831.513367,301.090729 819.912109,289.365112 808.222473,277.728729 
+	C805.102966,274.623444 804.953186,271.856598 808.055481,268.746429 
+	C819.348755,257.424469 830.662781,246.122070 841.837585,234.683868 
+	C845.237183,231.204163 847.862854,231.728455 851.011475,235.007217 
+	C858.165344,242.456543 865.519226,249.714355 872.825073,257.016724 
+	C874.570923,258.761688 876.252869,261.020081 878.964172,258.092621 
+	C881.268860,255.604141 882.413452,253.560242 879.267883,250.593369 
+	C872.361145,244.078873 865.770996,237.228668 859.057434,230.509583 
+	C856.731079,228.181305 854.055542,226.136353 853.103516,222.273056 
+	C843.919495,226.781265 834.074829,228.092773 827.208984,236.725037 
+	C819.785095,246.058716 810.644348,254.034744 802.174866,262.525574 
+	C797.906677,266.804565 796.277710,266.840485 792.229675,262.741211 
+	C781.109558,251.480240 770.033447,240.175217 759.007446,228.822098 
+	C754.761536,224.450180 754.856934,223.263840 759.111633,218.931366 
+	C768.100281,209.778427 776.770935,200.280212 786.194153,191.598801 
+	C792.265564,186.005341 794.206055,179.392578 794.763062,171.706314 
+	C795.041077,167.870026 793.928650,165.134079 791.114014,162.485168 
+	C784.807373,156.549683 778.845642,150.248978 772.687927,144.153091 
+	C771.314453,142.793411 770.215027,140.963135 768.038696,140.692947 
+	C763.152527,146.047363 763.106628,147.593613 767.766113,152.220795 
+	C773.441345,157.856720 779.193359,163.415955 784.825928,169.093872 
+	C789.598999,173.905289 789.534607,175.289444 784.698975,180.174133 
+	C774.265625,190.713333 763.744812,201.167526 753.420105,211.811996 
+	C748.032837,217.366028 747.065186,217.598831 741.419678,212.002670 
+	C733.965637,204.613724 726.234131,197.452667 719.339294,189.566406 
+	C712.477478,181.717896 705.068298,176.840958 694.266907,180.043121 
+	C693.652527,180.225250 692.925415,180.174835 692.276978,180.070053 
+	C688.247437,179.419052 685.387817,181.152100 682.626221,183.995010 
+	C672.874207,194.034241 662.870972,203.829010 653.076782,213.827942 
+	C650.130005,216.836258 647.504333,217.006348 644.542908,214.038101 
+	C641.601074,211.089523 638.580261,208.219559 635.585571,205.323853 
+	C630.175903,200.092896 629.258179,200.162567 623.407288,206.769897 
+	C628.230774,211.467178 633.019592,216.288681 637.991333,220.913513 
+	C641.013916,223.725220 640.819214,226.163254 638.022034,228.945602 
+	C626.207825,240.697174 614.423645,252.479370 602.694092,264.315399 
+	C600.099243,266.933807 597.636353,267.347351 594.953186,264.652588 
+	C583.197632,252.846130 571.461853,241.019989 559.698914,229.220871 
+	C557.346619,226.861328 557.554382,224.672836 559.655640,222.230270 
+	C561.199280,220.435928 563.711426,219.279541 564.038879,216.253067 
+	C561.017151,215.055939 558.142334,211.279526 555.076355,214.403946 
+	C551.457458,218.091797 548.191589,219.084641 544.050293,215.857330 
+	C542.375061,218.283737 539.212524,220.388840 540.119934,222.422562 
+	C542.549988,227.869247 538.733032,230.211044 535.832520,232.852966 
+	C532.333923,236.039642 534.175842,238.118652 536.450134,240.711929 
+	C539.098755,243.732071 540.714783,241.671692 542.520264,239.883865 
+	C543.348938,239.063278 544.155212,238.220047 544.981506,237.397034 
+	C549.283569,233.112305 550.522339,233.032913 554.793579,237.324402 
+	C565.840271,248.423752 576.779236,259.630554 587.850342,270.705322 
+	C590.827393,273.683350 590.861267,276.168945 587.865356,279.190063 
+	C577.192505,289.952881 566.585693,300.783722 556.124329,311.751373 
+	C554.304871,313.658875 550.655884,313.671265 550.171448,315.652161 
+	C548.814514,321.200714 544.117249,323.093536 540.617432,326.481506 
+	C530.928345,335.860931 521.726379,345.746033 512.402771,355.498962 
+	C509.811462,358.209534 506.605957,360.396149 504.690338,363.781677 
+	C511.560883,367.870972 513.417175,367.496704 518.495117,362.237244 
+	C527.637024,352.768585 536.968933,343.483643 546.174805,334.076355 
+	C548.537781,331.661713 550.663025,331.008118 553.354126,333.734314 
+	C564.943054,345.474365 576.683777,357.064880 588.242065,368.834686 
+	C592.316101,372.983246 592.154663,374.685822 587.989380,378.845093 
+	C579.146667,387.675049 570.238953,396.439880 561.383911,405.257538 
+	C556.519836,410.101135 556.525940,411.258301 561.234741,417.254669 
+	C563.333618,416.780975 564.407532,414.958466 565.776794,413.588989 
+	C575.555420,403.808624 585.364929,394.056183 594.973755,384.110535 
+	C598.075989,380.899597 600.580261,380.625671 603.760864,383.845093 
+	C615.002808,395.224213 626.390564,406.459381 637.628174,417.842834 
+	C641.597534,421.863739 641.481079,423.427155 637.492249,427.423767 
+	C626.309753,438.628082 615.012390,449.719696 603.953796,461.044647 
+	C600.644470,464.433624 598.104065,464.554718 594.786255,461.180420 
+	C585.557678,451.794861 576.165588,442.569641 566.801208,433.318420 
+	C565.548401,432.080719 564.613037,430.332153 562.588074,430.128479 
+	C556.655579,436.196411 556.694641,436.158356 562.231506,441.843414 
+	C572.208008,452.087036 582.920349,461.628967 592.259399,473.173889 
+	C597.579712,470.501648 601.369934,473.802094 605.215942,477.255463 
+	C610.060486,481.605438 614.708374,486.249664 620.688843,489.132233 
+	C618.126099,484.692047 614.490540,481.280273 610.997620,477.749329 
+	C606.495117,473.197815 606.205017,471.580994 610.758545,466.972565 
+	C622.348389,455.243073 634.178772,443.751526 645.887573,432.139252 
+	C648.195801,429.850128 650.266907,429.605499 652.712341,432.074951 
+	C664.435608,443.913269 676.302063,455.610260 687.983276,467.489563 
+	C692.246094,471.824646 692.023315,472.873932 687.584045,477.308228 
+	C676.973938,487.906494 666.371460,498.512360 655.778870,509.128082 
+	C649.748901,515.171204 649.763367,515.178650 642.912354,510.029938 
+	C642.709412,509.877411 642.291626,510.010651 641.325073,510.010651 
+	C640.074768,519.148743 638.816223,528.347290 637.369629,538.920044 
+	C640.473633,536.137451 642.485535,534.435059 644.382812,532.613159 
+	C649.161926,528.023682 649.723083,528.002319 654.462341,532.638062 
+	C660.140198,538.191895 665.816895,543.746887 671.497986,549.305115 
+	C676.638550,543.695618 676.696960,542.281799 672.234070,537.834717 
+	C668.220886,533.835754 664.227966,529.812622 660.104370,525.929504 
+	C657.006470,523.012268 657.085266,520.320374 660.032288,517.393311 
+	C664.523987,512.932007 668.935669,508.390350 673.873352,503.374451 
+M624.602539,463.102417 
+	C622.731323,464.992706 620.990479,467.039124 618.957825,468.735992 
+	C616.048218,471.164917 616.356689,473.036255 619.007385,475.580200 
+	C625.961731,482.254608 632.622437,489.233704 639.494080,495.995911 
+	C642.646973,499.098511 645.422607,502.640045 649.002563,505.018646 
+	C659.525940,494.680542 669.812439,484.547638 680.136169,474.452850 
+	C682.678406,471.966949 680.838867,470.349060 679.154297,468.664093 
+	C670.221741,459.728943 661.222107,450.859741 652.383545,441.832672 
+	C650.008850,439.407257 648.314148,439.195404 645.856323,441.746124 
+	C639.051819,448.807556 632.037781,455.666992 624.602539,463.102417 
+M600.682800,454.100433 
+	C610.321777,444.443085 619.942749,434.767639 629.614075,425.142761 
+	C631.673523,423.093170 631.780396,421.469940 629.561768,419.324066 
+	C620.706299,410.759125 611.922363,402.117035 603.268005,393.349457 
+	C600.452454,390.497040 598.438477,390.364563 595.563049,393.387268 
+	C587.074768,402.310211 578.399963,411.060730 569.624451,419.702332 
+	C567.058411,422.229248 567.353455,423.872833 569.762268,426.237976 
+	C578.434143,434.752533 586.926331,443.449890 595.526733,452.037811 
+	C596.764954,453.274292 597.821289,455.065796 600.682800,454.100433 
+M816.777771,373.964203 
+	C825.931274,383.150635 835.096558,392.325348 844.228394,401.533264 
+	C846.075500,403.395721 847.796204,404.445923 850.097961,402.106750 
+	C858.960632,393.099792 867.865601,384.134155 876.793152,375.191345 
+	C878.711670,373.269562 878.706543,371.635956 876.761963,369.694000 
+	C867.585876,360.530151 858.454712,351.320923 849.364807,342.071533 
+	C847.451904,340.125031 845.942566,340.010254 843.968811,342.063019 
+	C835.098083,351.288757 826.125000,360.415985 817.194946,369.584717 
+	C816.119751,370.688629 815.067810,371.825592 816.777771,373.964203 
+M817.385742,236.885086 
+	C820.794189,233.469360 824.164612,230.014526 827.624695,226.651886 
+	C829.841003,224.497955 830.021729,222.790375 827.556274,220.467026 
+	C817.092346,210.606049 805.024536,203.053513 792.716797,195.453384 
+	C784.349792,203.781387 776.198914,212.082138 767.812256,220.137436 
+	C764.971191,222.866150 765.009583,224.937897 767.665894,227.609055 
+	C776.581421,236.574356 785.455994,245.581848 794.230896,254.684418 
+	C796.502319,257.040649 798.035583,256.352142 799.975098,254.360870 
+	C805.547668,248.639603 811.237610,243.032700 817.385742,236.885086 
+M822.206055,264.704163 
+	C820.690186,266.244202 819.316467,267.965973 817.628540,269.286072 
+	C814.195679,271.970856 814.285278,274.098633 817.481567,277.210754 
+	C826.290039,285.787140 834.741028,294.729980 843.374207,303.487671 
+	C844.372070,304.500000 845.167542,305.963623 846.411133,305.335602 
+	C852.739258,298.737244 859.329651,292.407745 866.230591,286.437256 
+	C869.777405,283.368713 871.658936,280.386932 869.263977,275.754150 
+	C868.721619,274.704956 868.576416,272.824219 869.163086,271.919556 
+	C872.889160,266.174713 869.023743,263.047699 865.399780,259.594238 
+	C861.793396,256.157532 858.498962,252.394791 854.918335,248.929352 
+	C852.108765,246.210236 849.696777,243.013855 845.955566,240.722504 
+	C838.113586,248.637665 830.405823,256.417358 822.206055,264.704163 
+M640.036743,199.383240 
+	C642.440125,202.346298 644.843445,205.309372 647.246826,208.272430 
+	C649.098206,206.854843 649.733459,206.604492 650.178223,206.162430 
+	C659.370789,197.024948 668.495605,187.818695 677.749268,178.743729 
+	C680.065308,176.472412 679.345337,174.795609 677.478271,172.883209 
+	C667.612610,162.777939 657.758545,152.661346 647.934692,142.515533 
+	C646.510864,141.045044 645.032471,140.457855 643.042358,141.232147 
+	C640.412781,142.255188 637.754211,143.208237 635.083740,144.119995 
+	C632.772766,144.908966 632.115173,146.525253 632.447632,148.793762 
+	C633.240601,154.206192 634.158020,159.607086 634.730347,165.043671 
+	C635.783447,175.046158 638.737488,184.882599 637.413696,195.101974 
+	C637.192383,196.810684 638.551941,197.763824 640.036743,199.383240 
+M545.546021,345.068909 
+	C537.985901,352.731140 530.425842,360.393402 522.134644,368.796631 
+	C529.260498,370.761566 535.409790,372.565918 541.618896,374.133392 
+	C546.228699,375.297119 548.464722,378.144836 549.399597,382.740173 
+	C550.643127,388.853149 551.864075,395.026825 554.447388,400.720367 
+	C563.784851,391.503357 572.922485,382.483582 582.805847,372.727722 
+	C573.100403,363.247375 563.313904,354.001862 553.938171,344.357025 
+	C550.713806,341.040161 548.586060,341.172729 545.546021,345.068909 
+M826.493286,458.970917 
+	C823.441650,462.035065 820.366882,465.076752 817.352661,468.177216 
+	C816.461426,469.093964 815.007690,470.123749 815.878296,471.543488 
+	C817.894714,474.831970 820.602234,477.852600 823.878906,479.576141 
+	C826.490173,480.949677 828.475281,477.704620 830.320435,475.998169 
+	C834.408386,472.217560 838.654846,470.926056 843.903931,473.655212 
+	C847.433411,475.490295 851.216553,476.837738 854.888123,478.398926 
+	C866.986755,483.543457 866.987000,483.542664 875.922180,473.898834 
+	C876.148254,473.654846 876.359741,473.393616 876.608093,473.174438 
+	C879.012207,471.052216 878.792786,469.168457 876.518127,466.928711 
+	C867.631470,458.178680 858.822205,449.348419 850.095276,440.439148 
+	C847.917114,438.215515 846.360657,438.454865 844.346008,440.577606 
+	C838.626709,446.603760 832.779419,452.508392 826.493286,458.970917 
+M540.813477,495.673218 
+	C532.879211,486.432495 526.697754,475.989349 520.162903,465.743500 
+	C516.818970,468.300873 517.684937,470.694275 520.273254,473.439362 
+	C530.492310,484.277435 538.720825,496.578247 545.877808,509.575226 
+	C547.732849,512.943909 549.456787,513.814148 553.304810,512.914673 
+	C568.358154,509.396179 583.531372,506.394043 598.625610,503.044891 
+	C603.616699,501.937500 606.991150,503.077881 608.804260,508.207153 
+	C610.797302,513.845764 613.251526,519.320251 615.291321,524.943726 
+	C617.645081,531.433167 619.765686,538.007202 621.987488,544.544556 
+	C625.305908,533.797119 626.679138,523.003052 627.717529,512.155212 
+	C627.959290,509.630157 626.004333,508.768646 624.301147,507.746307 
+	C615.132812,502.243011 606.544739,495.940430 598.885010,488.485260 
+	C596.298889,485.968201 594.104553,485.786896 590.949890,487.222015 
+	C579.592163,492.388977 568.154114,497.383118 556.687256,502.304779 
+	C549.750793,505.282013 548.425171,504.845306 543.449768,498.950531 
+	C542.698364,498.060333 541.984619,497.138367 540.813477,495.673218 
+M595.478699,254.950577 
+	C597.750488,257.928223 599.661926,257.645905 602.258118,254.936996 
+	C609.738586,247.131821 617.524902,239.620331 625.161011,231.963516 
+	C632.091736,225.014023 632.175354,224.891022 625.224487,218.244888 
+	C615.143127,208.605469 617.944763,207.892868 607.511841,217.724869 
+	C597.803528,226.873978 589.015930,229.775818 577.282837,222.058914 
+	C572.132812,218.671707 570.104431,220.073853 566.979309,226.170944 
+	C576.298279,235.579788 585.646973,245.018738 595.478699,254.950577 
+M779.281006,174.466949 
+	C773.439758,167.328979 766.865784,160.946106 759.976257,154.883514 
+	C759.316711,155.551758 759.016296,155.748444 758.863953,156.026306 
+	C756.224915,160.839172 753.578796,165.648468 750.984619,170.485611 
+	C745.987427,179.803375 743.666626,181.048203 733.031799,179.828568 
+	C728.801453,179.343399 724.587830,179.024521 718.946167,179.573792 
+	C728.297607,188.864502 736.732422,197.277527 745.212402,205.644745 
+	C747.170593,207.576965 748.831360,206.418167 750.339294,204.858078 
+	C759.931885,194.933899 769.522278,185.007706 779.281006,174.466949 
+M540.782532,456.263397 
+	C539.306580,458.068451 537.907471,459.944031 536.333496,461.659149 
+	C534.697876,463.441498 534.716064,465.090546 536.080261,467.014404 
+	C540.895508,473.805115 545.626953,480.655273 550.436401,487.450134 
+	C551.298035,488.667419 552.354858,490.055084 554.124207,489.220764 
+	C562.651367,485.199890 572.108032,482.975372 579.108887,475.990082 
+	C581.611389,473.493134 581.953613,471.634155 579.242859,468.978333 
+	C571.868164,461.753021 564.748047,454.268555 557.448486,446.965271 
+	C555.969055,445.485077 554.768860,443.535309 552.118408,442.937561 
+	C548.541748,447.148499 544.896362,451.440399 540.782532,456.263397 
+M715.817383,504.684113 
+	C710.262268,499.271790 704.707092,493.859497 699.843628,489.121063 
+	C688.906189,499.589020 678.474121,509.566193 668.054626,519.556458 
+	C666.984558,520.582397 666.480286,521.764099 667.716675,523.016602 
+	C671.505005,526.854309 675.316650,530.669128 679.622620,534.999084 
+	C682.014404,530.293640 684.037476,526.518066 685.869751,522.652039 
+	C687.751404,518.682007 690.684753,517.272705 695.088257,517.483948 
+	C703.718140,517.897949 712.370422,517.880920 721.014160,517.941406 
+	C722.751465,517.953613 724.702759,518.407104 726.473816,516.451294 
+	C723.929260,511.991394 719.673462,508.966644 715.817383,504.684113 
+M864.143799,323.081879 
+	C873.952332,333.026123 883.752869,342.978302 893.579651,352.904419 
+	C894.796631,354.133667 896.087463,355.132904 897.831604,353.470825 
+	C905.142029,346.504150 912.497192,339.584534 919.835999,332.647705 
+	C918.196594,330.472626 917.152527,330.451050 916.188904,330.242584 
+	C908.717224,328.626312 901.300049,326.672424 893.762817,325.469604 
+	C886.314880,324.280945 882.148987,320.397766 880.998230,313.000183 
+	C880.684631,310.984192 880.817078,308.697754 878.819214,306.898499 
+	C873.740967,312.146881 868.119019,316.574005 864.143799,323.081879 
+M802.420349,491.873810 
+	C799.576355,487.966705 797.089233,488.238556 793.771423,491.772919 
+	C785.691284,500.380432 777.340820,508.744141 768.866516,516.966187 
+	C765.992004,519.755066 766.138916,521.662170 768.853943,524.310364 
+	C777.187988,532.439270 785.356506,540.737610 793.638123,548.920776 
+	C794.619995,549.890991 795.502808,551.393494 797.367432,550.771790 
+	C798.307678,548.996887 797.855164,547.128174 797.669434,545.367126 
+	C796.624634,535.462585 795.801147,525.515503 794.221130,515.692566 
+	C792.877747,507.341034 793.458801,500.465363 802.611206,497.008942 
+	C805.695129,495.844269 805.129089,494.021362 802.420349,491.873810 
+M884.622742,245.868423 
+	C886.187622,247.390198 888.052734,248.659821 889.584900,246.222916 
+	C892.512146,241.566803 899.277893,239.415192 898.622681,232.447815 
+	C898.594910,232.151779 898.293762,231.878357 898.110840,231.600418 
+	C893.812195,225.069733 889.431946,218.590652 885.253540,211.983917 
+	C883.670288,209.480453 881.954224,209.380478 879.384277,210.283234 
+	C873.750610,212.262161 870.432068,217.036499 866.106934,220.607544 
+	C863.109619,223.082260 863.459534,224.983627 866.031677,227.462967 
+	C872.140747,233.351593 878.094421,239.401337 884.622742,245.868423 
+M567.454529,289.954834 
+	C571.071594,286.278595 574.497070,282.383698 578.365662,278.994568 
+	C581.515503,276.235199 581.490662,274.270264 578.519775,271.384583 
+	C570.406189,263.503784 562.544373,255.364258 554.555176,247.354782 
+	C549.432007,242.218536 548.933105,242.305954 544.652344,249.117584 
+	C549.174255,254.204529 553.683350,259.514618 558.457458,264.574646 
+	C562.472412,268.830078 563.318481,273.390076 561.108154,278.760620 
+	C559.210876,283.370605 557.459106,288.048126 555.850281,292.766479 
+	C554.771606,295.930054 553.257324,299.064850 553.567322,302.523407 
+	C554.072571,302.934448 554.577820,303.345459 555.083069,303.756500 
+	C559.041260,299.323639 562.999512,294.890778 567.454529,289.954834 
+M665.817993,553.628906 
+	C660.520142,548.422546 655.222229,543.216248 649.680359,537.770142 
+	C644.717590,541.955383 640.610657,546.117920 636.787598,550.481689 
+	C638.178040,552.620911 639.942566,553.200317 641.630859,553.779236 
+	C648.532288,556.145569 655.461487,558.430664 662.377930,560.753296 
+	C664.297119,561.397766 666.095825,562.155273 667.556091,559.740784 
+	C669.022888,557.315430 668.036804,555.701050 665.817993,553.628906 
+M500.321655,354.402130 
+	C502.422882,356.288361 503.245148,354.004761 504.254761,353.041321 
+	C508.094727,349.376831 511.825745,345.597168 515.564026,341.827362 
+	C519.715759,337.640625 523.830811,333.417542 527.961792,329.210266 
+	C518.787598,329.183929 510.330414,331.056763 501.928436,333.218475 
+	C500.651215,333.547089 500.061646,334.685883 500.132751,335.917480 
+	C500.476654,341.873077 499.033173,347.820709 500.321655,354.402130 
+M779.149902,140.220001 
+	C784.709045,145.795883 790.268188,151.371750 796.387756,157.509781 
+	C796.976807,153.604675 797.357483,150.668335 797.881653,147.757843 
+	C798.204834,145.963486 797.603088,144.928101 795.885559,144.358292 
+	C790.693298,142.635696 785.523865,140.844452 780.330444,139.125412 
+	C779.755798,138.935196 779.084229,139.038147 778.457581,139.005127 
+	C778.562500,139.289993 778.667480,139.574875 779.149902,140.220001 
+M662.584229,138.828659 
+	C660.345825,134.500610 657.542969,136.852737 654.093872,138.128860 
+	C659.368103,145.394073 666.460999,150.210159 672.161682,156.384460 
+	C669.083252,150.747192 666.004822,145.109940 662.584229,138.828659 
+M930.998413,353.582336 
+	C927.025085,357.629517 923.051758,361.676697 918.251892,366.565826 
+	C921.720032,365.778778 923.930481,365.070892 926.192627,364.808044 
+	C930.515869,364.305695 932.335205,362.079987 931.727661,357.774170 
+	C931.543701,356.470245 931.557739,355.138428 930.998413,353.582336 
+M867.823303,423.421021 
+	C870.697998,421.112244 870.837280,417.531555 871.718689,414.022919 
+	C869.520386,415.373230 868.101196,417.383118 866.509644,419.245758 
+	C864.974060,421.042938 865.619324,422.195404 867.823303,423.421021 
+M770.796204,560.378845 
+	C769.353394,557.398438 766.898682,555.633545 763.998840,554.390808 
+	C765.752197,557.001709 764.515808,562.757935 770.796204,560.378845 
+z"/><path fill="#ffffff" opacity="1.000000" stroke="none" 
+	d="
+M409.229004,709.315796 
+	C345.397644,744.704956 269.822784,702.555786 259.580658,636.180481 
+	C250.589157,577.909973 289.963776,525.134399 348.384308,518.019409 
+	C404.051636,511.239807 451.142212,550.541260 460.279480,602.086609 
+	C467.890106,645.019958 448.267548,686.186279 409.229004,709.315796 
+M382.712341,534.830566 
+	C368.766479,531.164307 354.670746,530.764465 340.678284,534.016907 
+	C293.728638,544.929932 264.896667,590.177368 274.432434,637.596252 
+	C283.895081,684.651367 331.114990,715.786926 378.057922,705.924194 
+	C421.452911,696.806885 450.966492,655.936035 446.996460,611.653076 
+	C443.742737,575.360413 417.850067,544.338989 382.712341,534.830566 
+z"/><path fill="#ffffff" opacity="1.000000" stroke="none" 
+	d="
+M672.307190,438.705688 
+	C668.430237,434.781799 664.830017,431.078705 661.168518,427.437164 
+	C658.374939,424.658813 656.331055,421.774780 659.334778,417.908569 
+	C656.344543,414.683228 653.993652,411.127289 648.780640,413.654175 
+	C647.149780,414.444672 645.379211,412.742645 644.059998,411.410339 
+	C632.571716,399.807983 621.108643,388.180664 609.583618,376.615021 
+	C606.915710,373.937683 606.917053,371.548676 609.610474,368.915619 
+	C613.302490,365.306213 616.519775,361.109344 620.582153,358.003448 
+	C627.471863,352.735901 630.020264,346.002167 629.197693,337.382416 
+	C627.372375,337.718414 626.370605,339.283386 625.183899,340.481140 
+	C618.147461,347.583038 611.184631,354.758118 604.129028,361.840729 
+	C599.935486,366.050262 598.730652,366.140320 594.665710,362.119598 
+	C583.174438,350.753204 571.823486,339.244934 560.326660,327.884216 
+	C557.642212,325.231506 557.444641,322.925995 560.126648,320.233521 
+	C571.767212,308.547852 583.401123,296.855164 594.957581,285.086578 
+	C597.779480,282.212891 600.080017,282.890076 602.586914,285.407288 
+	C612.342346,295.202667 622.141602,304.954254 631.928833,314.717834 
+	C632.736938,315.523987 633.577148,316.297882 634.404358,317.088593 
+	C640.175781,310.706970 640.189392,309.703430 634.586487,304.094482 
+	C626.814331,296.313934 619.000732,288.574677 611.248779,280.774048 
+	C605.408020,274.896515 605.424255,274.203430 611.280518,268.416779 
+	C619.926208,259.873840 628.613281,251.372772 637.248413,242.819305 
+	C639.613403,240.476669 641.883179,238.035812 644.148132,235.594940 
+	C647.262634,232.238464 649.960388,232.210510 653.330688,235.674011 
+	C663.090088,245.703354 673.196350,255.394348 683.025696,265.356964 
+	C685.369507,267.732483 687.516907,268.702209 690.899231,267.651154 
+	C697.268433,265.671844 703.883545,264.634430 710.534790,264.242340 
+	C713.815430,264.048950 716.101990,262.685516 718.295837,260.439697 
+	C726.444702,252.097992 734.675415,243.835449 742.937622,235.605728 
+	C747.119629,231.440201 748.064331,231.449982 752.329163,235.685776 
+	C763.678345,246.957443 774.885925,258.373352 786.341370,269.535278 
+	C789.893250,272.996124 789.617859,275.571838 785.958496,278.494812 
+	C783.882690,280.152893 782.018494,282.084381 780.121094,283.955719 
+	C774.362549,289.635101 774.374329,289.647034 781.221375,295.347595 
+	C785.348022,292.620728 788.374573,288.638947 791.822693,285.115631 
+	C796.146057,280.697906 797.677673,280.634155 802.074158,284.972473 
+	C812.746826,295.504028 823.413269,306.042206 834.024292,316.635773 
+	C839.761597,322.363647 839.738953,323.861084 833.949341,329.704071 
+	C825.036255,338.699402 816.176941,347.753143 807.068604,356.547791 
+	C802.308167,361.144348 798.049316,365.751709 797.510742,372.815277 
+	C797.338623,375.072327 796.265381,377.260712 795.445374,380.014496 
+	C798.662476,379.556213 800.709961,381.156769 802.620117,383.063782 
+	C813.703918,394.129242 824.836121,405.146576 835.870728,416.260803 
+	C840.489136,420.912506 840.404846,422.424286 835.863037,426.979370 
+	C824.921509,437.952820 813.990906,448.937256 803.012878,459.874023 
+	C798.667114,464.203430 797.449951,464.225555 793.166992,459.974487 
+	C783.352234,450.232910 773.601807,440.426575 763.830811,430.640991 
+	C758.321106,425.123016 757.762085,425.107635 751.104431,430.450500 
+	C751.743042,432.445892 753.445374,433.591309 754.835388,434.977112 
+	C765.101318,445.211945 775.427063,455.387360 785.631165,465.683472 
+	C791.068359,471.169769 790.806885,472.579956 785.432678,477.860809 
+	C774.977051,488.134918 764.703918,498.594604 754.335815,508.958069 
+	C749.165894,514.125671 748.245972,514.110535 743.063171,508.929626 
+	C732.104248,497.974457 721.227600,486.935333 710.151917,476.099487 
+	C706.936584,472.953766 706.814575,470.313446 709.889160,467.188629 
+	C719.352905,457.570038 728.772888,447.908325 738.203247,438.256958 
+	C739.446045,436.985077 740.967712,435.929291 741.490967,434.489899 
+	C730.527588,434.447327 722.735168,440.312408 715.896362,448.350342 
+	C711.921570,453.022095 707.118164,456.985626 702.726196,461.307007 
+	C700.014893,463.974762 697.612793,463.652161 694.996216,461.034698 
+	C687.577332,453.613434 680.045166,446.305511 672.307190,438.705688 
+M645.586487,365.807892 
+	C645.840271,366.772308 646.104553,367.734100 646.346313,368.701538 
+	C657.588684,413.684631 707.940308,435.866730 748.401245,413.659729 
+	C780.976318,395.780914 793.951294,355.934845 777.863037,320.775970 
+	C767.103271,297.261963 748.425049,283.109711 722.502380,280.303986 
+	C693.674805,277.183868 671.066528,288.503174 655.359619,312.770813 
+	C645.068359,328.671082 642.216980,346.327423 645.586487,365.807892 
+M741.172180,497.330200 
+	C742.248535,498.373932 743.475342,499.303040 744.373840,500.482269 
+	C747.418213,504.477966 749.968811,503.723145 753.166748,500.368042 
+	C761.439880,491.688232 769.952026,483.233063 778.485229,474.806274 
+	C780.713806,472.605621 781.053894,470.937683 778.687195,468.597931 
+	C769.684143,459.697449 760.753479,450.722046 751.903687,441.669037 
+	C749.383606,439.091034 747.509766,439.002930 744.912598,441.696381 
+	C736.357178,450.569092 727.661743,459.310547 718.866943,467.946350 
+	C716.280457,470.486023 716.086975,472.248169 718.808472,474.881348 
+	C726.228516,482.060669 733.399292,489.497620 741.172180,497.330200 
+M769.989441,426.555511 
+	C778.090637,434.681458 786.318237,442.687012 794.230652,450.992737 
+	C797.383240,454.302002 799.489807,453.765991 802.360779,450.765350 
+	C808.912781,443.917450 815.782349,437.374420 822.390503,430.578705 
+	C825.135864,427.755432 828.253174,425.212402 831.236206,420.133057 
+	C820.969482,410.376587 810.504333,400.427338 800.033020,390.484558 
+	C798.257202,388.798401 796.750549,389.536621 795.310852,391.029846 
+	C785.521057,401.182831 775.723083,411.327850 765.872437,421.532776 
+	C766.322876,423.595947 768.281006,424.543213 769.989441,426.555511 
+M574.474670,332.024414 
+	C581.433044,338.968140 588.511230,345.797577 595.293518,352.909210 
+	C598.192566,355.949036 600.216492,355.818512 603.044006,352.869995 
+	C611.345703,344.213104 619.866943,335.766907 628.281372,327.217651 
+	C629.189026,326.295502 630.352173,325.467834 630.271973,324.243622 
+	C619.498108,313.522827 608.911499,302.988281 598.044067,292.174347 
+	C597.199524,292.334686 596.432983,293.499756 595.514771,294.417236 
+	C588.324524,301.600952 581.143311,308.793762 573.980103,316.004425 
+	C564.919434,325.125122 565.837097,323.157776 574.474670,332.024414 
+M654.241394,289.734344 
+	C660.977295,282.013245 669.874146,277.108276 678.352600,272.096802 
+	C678.065491,271.070892 678.076172,270.655182 677.873596,270.450500 
+	C668.862061,261.343811 659.828308,252.259003 650.806091,243.162735 
+	C648.781982,241.122009 647.350708,242.327377 645.818542,243.904205 
+	C640.944641,248.920303 636.070496,253.939072 631.081421,258.839722 
+	C625.884705,263.944397 620.554382,268.913086 615.704834,273.538422 
+	C625.503479,283.513245 634.507690,292.679321 643.623291,301.958740 
+	C647.014587,298.035095 650.379761,294.141632 654.241394,289.734344 
+M828.989258,324.077667 
+	C829.373169,322.959656 828.796204,322.102142 828.096741,321.401184 
+	C818.005188,311.287659 807.892517,301.195190 797.761841,291.120850 
+	C797.591248,290.951202 797.133850,291.069916 796.810303,291.054077 
+	C796.516174,290.762177 796.222107,290.470245 795.927979,290.178345 
+	C793.907837,292.613678 792.145020,295.338684 789.806702,297.415802 
+	C786.393799,300.447479 785.887817,303.086700 788.263245,307.289459 
+	C794.272156,317.920410 798.403503,329.288147 799.421936,341.621277 
+	C799.687927,344.843231 800.315125,348.035339 800.799988,351.404968 
+	C810.322388,342.247375 819.487244,333.433685 828.989258,324.077667 
+M738.064148,250.563278 
+	C733.875732,254.900711 729.687256,259.238129 724.841003,264.256805 
+	C732.417236,265.706055 738.744995,266.990295 744.799438,269.316406 
+	C751.050781,271.718201 756.768799,275.089966 762.344299,278.721588 
+	C770.638916,284.124298 770.518005,284.062775 777.375427,276.936371 
+	C779.670410,274.551270 779.560547,272.987274 777.309814,270.764038 
+	C768.318359,261.882416 759.454224,252.872101 750.519165,243.933167 
+	C749.611877,243.025452 748.823792,241.819839 746.458801,241.115463 
+	C743.820862,244.092010 741.182922,247.068573 738.064148,250.563278 
+M671.702026,427.630310 
+	C679.741394,435.804413 687.763245,443.995941 695.837585,452.135345 
+	C697.163025,453.471497 698.586548,455.679138 700.774780,453.559570 
+	C705.597839,448.887695 710.262878,444.052551 715.944031,438.324524 
+	C703.288269,437.659821 692.335388,436.047180 682.108826,431.305756 
+	C678.504272,429.634552 674.948975,427.857086 671.371216,426.128113 
+	C671.262878,426.367035 671.110413,426.598145 671.065979,426.848419 
+	C671.045532,426.963623 671.236816,427.116364 671.702026,427.630310 
+M634.080383,391.411163 
+	C636.309875,393.530579 638.539368,395.649963 640.768860,397.769348 
+	C635.306091,385.893738 631.184143,373.807495 629.194092,362.106262 
+	C624.881531,365.807404 620.677856,369.415131 615.327209,374.007172 
+	C621.649292,379.860443 627.616882,385.385468 634.080383,391.411163 
+z"/><path fill="#ffffff" opacity="1.000000" stroke="none" 
+	d="
+M730.959961,233.958252 
+	C721.561768,243.441437 712.429138,252.689911 703.255737,261.897705 
+	C698.888062,266.281738 697.301392,266.283051 692.941040,261.980103 
+	C682.030334,251.213074 671.110291,240.455170 660.263245,229.624252 
+	C655.601624,224.969574 655.683777,223.639175 660.329712,218.990326 
+	C670.930847,208.382492 681.508423,197.750946 692.155457,187.189331 
+	C696.926697,182.456345 698.589355,182.587479 703.276306,187.298660 
+	C713.852661,197.929688 724.456177,208.533966 735.095398,219.102051 
+	C740.197876,224.170395 740.247864,224.722488 735.111389,229.832336 
+	C733.811829,231.125168 732.509766,232.415390 730.959961,233.958252 
+M684.702087,243.797058 
+	C688.903137,248.236191 693.104248,252.675323 697.518127,257.339264 
+	C708.447876,246.505997 718.584045,236.493958 728.669312,226.430969 
+	C730.478638,224.625656 729.227905,223.151093 727.839539,221.767639 
+	C718.889832,212.849045 709.897034,203.972488 701.048584,194.954330 
+	C698.625610,192.484879 696.895264,192.550507 694.494568,195.005188 
+	C685.660217,204.038361 676.658081,212.907272 667.739136,221.858002 
+	C666.946838,222.653183 665.910767,223.380875 666.333923,226.090897 
+	C671.771240,231.327652 677.986023,237.313110 684.702087,243.797058 
+z"/></svg>`,
                 formulaStr: 'Q = 0.046 × 直徑 × 齒寬 × K',
                 fields: { dim1: { label: '直徑' }, dim2: { label: '齒寬' } },
                 calc: (d1, d2, qty, k) => 0.046 * (d1 / 10) * (d2 / 10) * k
             },
-            { id: 'chain', name: '鍊條', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="10" height="10" rx="5" /><rect x="12" y="7" width="10" height="10" rx="5" /><path d="M7 12h10"/></svg>', formulaStr: 'Q = 0.008 × 長度 × 寬度 × K', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.008 * (d1 / 10) * (d2 / 10) * k },
+            { id: 'chain', name: '鍊條', svg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 170 196" xml:space="preserve"><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M95.500000,54.500000 
+	C96.550499,59.669582 99.965759,63.710655 103.159607,67.360329 
+	C110.494423,75.741951 115.668594,85.498947 121.962975,94.525818 
+	C123.339828,96.500381 119.129364,106.824974 116.559875,109.556328 
+	C114.362175,111.892487 111.765160,112.202477 109.004654,111.949272 
+	C105.984200,111.672226 103.016991,110.800354 99.996323,110.543236 
+	C94.408760,110.067627 91.833244,112.415184 91.509354,118.000542 
+	C91.296883,121.664513 91.872078,125.355484 91.012405,129.002930 
+	C89.771523,134.267731 87.536102,135.747253 81.997040,135.022629 
+	C79.681526,134.719727 77.177147,134.081177 75.040329,134.651215 
+	C72.485329,135.332794 71.612091,134.211456 70.477615,132.514969 
+	C68.030014,128.854843 65.805565,125.038841 62.525429,121.972794 
+	C59.731670,119.361397 57.821163,116.125008 56.452717,112.517937 
+	C55.718880,110.583626 54.862617,108.463280 53.435993,107.065323 
+	C47.846222,101.587914 48.974804,95.569931 50.880295,88.965462 
+	C52.606190,82.983482 56.100170,81.971443 61.984131,83.558815 
+	C65.073990,84.392395 67.970184,85.918503 71.006454,86.981560 
+	C76.631134,88.950874 79.840736,87.510445 81.448914,81.985130 
+	C82.781425,77.406944 83.084259,72.303459 87.053177,69.065170 
+	C90.873451,65.948158 95.673584,68.058418 99.998398,67.487839 
+	C100.593361,67.409340 101.166672,67.166672 101.750000,67.000008 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M53.500000,25.000000 
+	C53.803802,22.829300 54.107605,20.658598 54.562855,17.405781 
+	C53.759956,16.750954 52.366165,15.641926 51.002762,14.496712 
+	C47.748753,11.763443 43.825397,11.747979 41.054211,15.045556 
+	C36.942715,19.938028 32.134010,23.426966 26.041256,25.614885 
+	C20.298050,27.677282 19.149426,34.750488 23.542120,38.956005 
+	C25.250996,40.592064 27.935797,39.555992 30.000000,40.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M77.000000,144.500000 
+	C73.586693,145.247559 69.431870,144.581497 67.556274,148.526749 
+	C65.977112,151.848480 65.965630,155.349121 69.027847,157.967422 
+	C73.205025,161.539078 75.910812,165.976486 78.059021,170.974640 
+	C80.592232,176.868576 82.482689,178.049469 86.998589,177.488647 
+	C91.675888,176.907761 92.999214,173.526459 93.516151,169.502075 
+	C93.560982,169.153091 93.833328,168.833328 94.000000,168.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M148.500000,159.000000 
+	C153.196136,153.329575 153.419327,146.260315 154.419662,139.488129 
+	C154.747559,137.268402 154.844711,135.618423 156.888336,133.869507 
+	C161.246399,130.139938 161.166489,126.674446 156.950607,122.550484 
+	C152.829010,118.518730 150.012558,113.809547 147.988495,108.504395 
+	C146.754684,105.270554 144.757797,102.903580 141.002502,102.477974 
+	C137.513779,102.082596 135.288910,103.972557 133.528244,106.519524 
+	C131.040131,110.118774 133.117126,113.158043 135.571793,115.422165 
+	C139.730911,119.258476 141.985748,124.116676 144.620377,128.934174 
+	C148.261292,135.591660 147.610107,142.565247 145.771484,148.934021 
+	C142.199738,161.306122 132.973862,170.209442 120.912201,172.546951 
+	C106.100471,175.417435 92.560211,171.273148 84.583282,156.455170 
+	C81.104485,149.992935 77.609985,143.578430 73.540428,137.473053 
+	C73.232750,137.011459 73.500000,136.166672 73.500000,135.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M25.500000,64.500000 
+	C22.333334,63.139095 19.156519,61.766518 16.002598,64.502991 
+	C12.161617,67.835587 11.801532,72.193283 15.549822,75.950294 
+	C19.762348,80.172615 23.227413,84.583069 25.155687,90.448822 
+	C26.872864,95.672424 30.549707,96.862259 35.509399,95.535133 
+	C38.975239,94.607742 38.769558,91.117607 40.500000,89.000000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M122.500000,95.000000 
+	C125.618591,93.933495 129.420639,94.819908 131.574081,91.042236 
+	C133.475937,87.705917 133.597458,84.491699 130.922913,82.085693 
+	C126.068367,77.718605 123.037788,72.304909 120.524269,66.489510 
+	C119.335968,63.740208 117.587479,61.545593 114.501152,61.586693 
+	C111.356277,61.628571 107.958992,61.812473 106.935905,65.984283 
+	C106.705315,66.924553 105.666664,67.666664 105.000000,68.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M50.000000,103.500000 
+	C47.160992,104.652885 43.445946,103.247223 41.433365,106.963921 
+	C39.560112,110.423332 39.213795,113.751724 42.064121,116.431808 
+	C46.495525,120.598549 49.390270,125.628365 52.048561,130.975861 
+	C55.880226,138.683731 61.597507,138.805740 66.499802,131.499863 
+	C66.834633,131.000870 67.166656,130.500000 67.499992,130.000000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M78.500000,30.500000 
+	C79.745567,28.332067 78.173317,25.555563 80.449478,23.445501 
+	C85.509598,18.754641 91.189522,19.737219 93.905273,26.537828 
+	C96.037521,31.877295 98.868828,36.481468 102.938354,40.561485 
+	C107.149811,44.783802 107.027573,47.141743 103.500000,52.000004 
+	C101.684311,54.500633 95.653847,54.724495 93.471008,52.528820 
+	C92.021996,51.071297 91.215881,49.264553 90.550095,47.481297 
+	C84.627586,31.618320 71.271545,24.181589 55.014511,25.659611 
+	C48.585663,26.244097 42.570358,29.331135 37.535973,33.542999 
+	C27.885796,41.616524 25.331270,52.637314 26.191906,64.486061 
+	C26.452669,68.076073 28.431246,71.912491 30.611717,74.918976 
+	C36.107685,82.496986 42.166664,89.666664 48.000000,97.000000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M142.500000,158.500000 
+	C145.012314,158.540253 147.522049,158.216751 149.529739,160.473557 
+	C153.709183,165.171616 152.823074,170.361755 146.980026,172.954987 
+	C141.926880,175.197662 137.132065,177.648224 133.479034,181.982330 
+	C129.697525,186.468826 126.388985,187.331345 123.000000,185.000000 
+	C118.234703,181.721817 117.687309,179.203857 120.500000,173.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M93.000000,174.500000 
+	C100.738853,179.035507 108.940491,181.467484 118.000000,180.000000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M79.500000,23.500000 
+	C71.900345,19.054972 63.593918,18.073132 55.000000,18.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M23.500000,40.000000 
+	C19.650919,47.030182 18.757732,54.651546 19.000000,62.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M122.500000,98.000000 
+	C126.361359,101.259453 127.218071,107.001015 132.000000,109.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M129.500000,94.000000 
+	C131.500000,97.166664 133.500000,100.333336 135.500000,103.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M63.500000,136.500000 
+	C66.519135,138.884323 67.670311,142.617737 70.000000,145.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M37.500000,96.000000 
+	C39.333332,98.833336 41.166668,101.666664 43.000000,104.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M103.500000,54.000000 
+	C104.385643,57.292759 107.823326,59.084316 108.500000,62.500000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M111.500000,125.000000 
+	C107.145683,126.002945 103.182564,127.487259 100.455009,131.469177 
+	C96.976036,136.548080 96.755119,141.662231 99.512703,146.993439 
+	C102.544083,152.853989 107.587212,155.307892 113.998466,154.970810 
+	C120.198418,154.644836 124.822723,151.765045 127.506859,146.003189 
+	C131.780228,136.829849 125.635300,124.797394 112.000000,125.000000 
+"/><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
+	d="
+M58.500000,43.000000 
+	C48.270344,45.565166 44.395531,50.135708 44.454937,59.000301 
+	C44.493000,64.679504 48.852417,71.721130 58.001793,72.987045 
+	C65.413353,74.012512 73.142754,68.520569 74.651192,61.532639 
+	C76.181740,54.442341 72.254700,46.579685 65.520592,44.435345 
+	C63.361042,43.747677 61.284843,42.987904 59.000000,43.000000 
+"/></svg>`, formulaStr: 'Q = 0.008 × 長度 × 寬度 × K', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.008 * (d1 / 10) * (d2 / 10) * k },
         ];
 
         const ALLOWED_SIZES = [0.1, 0.2, 0.3, 0.4, 0.5];
@@ -1200,7 +2151,7 @@
                 const selectedPointIds = ref([]);
                 const newPoint = reactive({ name: '', kFactor: 1.0, rpm: null, direction: 'horizontal', dim1: 0, dim2: 0, qty: 1 });
                 const points = ref([]);
-                const groups = ref([{ id: 101, name: 'Group A', slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'S', partSuffix2: '' }]);
+                const groups = ref([{ id: 101, name: 'Group A', slots: [null], isEditing: false, isCollapsed: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' }]);
                 const settings = reactive({ pipeLength: 5, pipeDiameter: 4, pumpFlow: 100, safetyFactor: 1.25, reliefTime: 10, resetTime: 1.5 });
 
                 const showAddModal = ref(false);
@@ -1245,8 +2196,8 @@
                                 // V3.13: Backfill missing part number fields for old data
                                 groups.value.forEach(g => {
                                     if (!g.partPrefix) g.partPrefix = 'T';
-                                    if (g.partSuffix1 === undefined) g.partSuffix1 = 'S';
-                                    if (g.partSuffix2 === undefined) g.partSuffix2 = '';
+                                    if (g.partSuffix1 === undefined) g.partSuffix1 = 'A';
+                                    if (g.partSuffix2 === undefined) g.partSuffix2 = 'G';
                                 });
                             }
                         } catch (e) {
@@ -1454,7 +2405,7 @@
                     selectedPointIds.value = [];
                 };
 
-                const addGroup = () => groups.value.push({ id: nextGroupId++, name: `Group ${String.fromCharCode(65 + groups.value.length)}`, slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'S', partSuffix2: '' });
+                const addGroup = () => groups.value.push({ id: nextGroupId++, name: `Group ${String.fromCharCode(65 + groups.value.length)}`, slots: [null], isEditing: false, isCollapsed: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' });
                 const removeGroup = (index) => groups.value.splice(index, 1);
                 const addSlot = (i) => groups.value[i].slots.push(null);
                 const removeLastSlot = (i) => { if (groups.value[i].slots.length > 1) groups.value[i].slots.splice(groups.value[i].slots.length - 1, 1); };
@@ -1866,6 +2817,13 @@
                     showImportModal.value = false;
                 };
 
+                // V3.14: Global Fold Toggle
+                const toggleAllFold = () => {
+                    const anyExpanded = groups.value.some(g => !g.isCollapsed);
+                    // If any is expanded, collapse all. Else expand all.
+                    groups.value.forEach(g => g.isCollapsed = anyExpanded);
+                };
+
                 const getTypeName = (id) => { if (id === 'merged') return { name: '組合點', icon: 'fa-solid fa-link' }; return lubeTypes.find(t => t.id === id) || { name: '-', icon: '' }; };
 
                 return {
@@ -1880,7 +2838,7 @@
                     availablePointsForEdit, addChildToGroup, removeChildFromGroup, selectedPointToAddId,
                     // V3.8 new exports
                     showEditPointModal, editingPointData, editCurrentType, saveEditPoint,
-                    resetAllData, copyPartNumber
+                    resetAllData, copyPartNumber, toggleAllFold
                 };
             }
         }).mount('#app');

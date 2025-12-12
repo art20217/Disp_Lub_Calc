@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      .arrow-line {
+        fill: none;
+        stroke: #FFFFFF;
+        stroke-width: 24;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  
+  <!-- Top Arrow -->
+  <!-- Horizontal Bar at Tip -->
+  <line class="arrow-line" x1="156" y1="64" x2="356" y2="64" />
+  <!-- Arrowhead -->
+  <polyline class="arrow-line" points="176,164 256,84 336,164" />
+  <!-- Shaft -->
+  <line class="arrow-line" x1="256" y1="84" x2="256" y2="224" />
+
+  <!-- Bottom Arrow -->
+  <!-- Horizontal Bar at Tip -->
+  <line class="arrow-line" x1="156" y1="448" x2="356" y2="448" />
+  <!-- Arrowhead -->
+  <polyline class="arrow-line" points="176,348 256,428 336,348" />
+  <!-- Shaft -->
+  <line class="arrow-line" x1="256" y1="428" x2="256" y2="288" />
+</svg>
