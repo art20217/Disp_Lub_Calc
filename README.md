@@ -1,20 +1,59 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
-# Run and deploy your AI Studio app
+# 容積式潤滑系統計算器 (Displacement Lubrication System Calculator)
 
-This contains everything you need to run your app locally.
+這是一個基於 Web 的單頁應用程式 (SPA)，專為機械工程師設計，用於計算和規劃容積式潤滑系統。它協助使用者估算潤滑點的油量需求、配置分配器編組，並驗證系統參數（如升壓時間、循環時間）是否符合安全規範。
 
-View your app in AI Studio: https://ai.studio/apps/drive/1nvmcejRvdsjmwR2ZS2LlDgDb56BH3tt8
+## 線上展示 (Live Demo)
+本應用程式已託管於以下網址，可直接線上使用：
+- **[https://ll-rd-a392c.web.app](https://ll-rd-a392c.web.app)**
 
-## Run Locally
+## 主要功能
 
-**Prerequisites:**  Node.js
+### 1. 潤滑點管理 (Lubrication Points)
+- **多種潤滑類型支援**：內建滾珠軸承、滑動軸承、平面滑動、圓筒滑動軌道、線性滑軌、凸輪、齒輪、鍊條等多種常見機械元件的計算公式。
+- **參數輸入**：針對不同類型提供專屬參數欄位（如直徑、長度、轉速、方向等）。
+- **K 值自動計算**：根據輸入的 RPM 自動推算 K 值 (經驗公式)，也可手動調整。
+- **組合點功能**：支援將多個潤滑點合併為一個「組合點」，方便管理複雜機構。
 
+### 2. 分配器編組 (Distributor Groups)
+- **可視化配置**：透過介面按鈕將潤滑點分配至不同的分配器組槽位。
+- **規格代碼計算**：自動根據分配到該組的潤滑點流量，計算出分配器的規格代碼 (Code)。
+- **件號產生器**：內建件號編輯器，可自訂型號 (Prefix)、入油口/出油口規格，並一鍵複製完整的分配器訂購料號。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### 3. 系統參數計算 (System Calculations)
+- **即時驗證**：根據設定的主管長度、管徑、泵浦吐出量等，即時計算：
+  - 管路容積
+  - 升壓時間
+  - 分配器作動時間
+  - 最低運轉與停止時間
+- **視覺化回饋**：若潤滑週期過長或比例不當，系統會以顏色標示警告 (如「週期過長」標籤)。
+
+### 4. 資料存取與互動
+- **自動儲存**：所有資料變更皆即時儲存於瀏覽器 `localStorage`，關閉視窗後資料不流失。
+- **匯入/匯出**：支援將專案存檔為 JSON 格式，方便備份或在不同電腦間移轉。
+- **折疊/展開**：支援分配器組的個別或全域折疊，優化大圖面下的操作體驗。
+- **深色模式**：針對長時間工作優化的深色 UI 設計 (Dark Mode)。
+
+## 系統需求與執行
+
+### 需求
+- 任何現代化的網頁瀏覽器 (Chrome, Edge, Firefox, Safari)。
+- 建議解析度：1920x1080 或以上以獲得最佳體驗。
+
+### 執行方式
+1. 下載專案資料夾中的 `index.html` 檔案。
+2. 直接雙擊 `index.html` 或將其拖曳至瀏覽器中開啟。
+3. 程式會自動載入所需的外部資源 (Vue.js, Tailwind CSS, FontAwesome)。
+   > **注意**：本程式使用 CDN 載入函式庫，因此執行時電腦**必須保持網路連線**。
+
+## 技術架構
+
+- **核心框架**: Vue.js 3 (Composition API)
+- **樣式庫**: Tailwind CSS (CDN)
+- **圖示庫**: FontAwesome 6
+- **持久化**: Browser LocalStorage API
+- **檔案操作**: File Reader API / Blob (用於匯入匯出)
+
+## 注意事項
+- 本工具提供的計算結果僅供設計參考，實際配置仍需考量現場環境、油品黏度與廠商規範。
+- 若需在無網路環境下使用，需下載相關 JS/CSS library 並修改 `index.html` 中的引用路徑為本地路徑。
