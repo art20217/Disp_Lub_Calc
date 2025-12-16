@@ -1188,14 +1188,38 @@
          * @param {number} rpm - 轉速
          * @returns {number} K 值 (保留兩位小數)
          */
-        function calculateK(rpm) {
-            if (rpm <= 0) return 0; // 避免 log(0)
+        /**
+         * 根據轉速 (RPM) 與 機構類型 計算建議 K 值 (V3.31 Dynamic Logic)
+         * 依據: 容積式潤滑系統中係數 K 與機構轉速之動態關聯性深度研究報告
+         * @param {string} typeId - 機構類型 ID
+         * @param {number} rpm - 轉速
+         * @returns {number} 建議 K 值
+         */
+        function calculateRecommendedK(typeId, rpm) {
+            if (!rpm || rpm <= 0) return 1.0; // Base K
 
-            // 公式：K = 0.8 * log10(RPM) - 0.6
-            let k = 0.8 * Math.log10(rpm) - 0.6;
+            let k = 1.0;
 
-            // 限制範圍 (根據圖表，K 值大約在 0.1 到 2.6 之間)
-            if (k < 0.1) k = 0.1;
+            // 1. 滾珠軸承 (Rolling Bearings) - Stepwise Model (Trabon)
+            if (typeId === 'ball_bearing') {
+                if (rpm < 100) k = 1.0;
+                else if (rpm < 250) k = 2.0;
+                else if (rpm < 500) k = 4.0;
+                else k = 10.0;
+            }
+            // 3. 高負載旋轉機構 (Gears, Cams) - Quadratic Model
+            else if (['gear', 'cam'].includes(typeId)) {
+                // K = 1 + (RPM/200)^2
+                // Example: 200 RPM -> K=2, 400 RPM -> K=5
+                k = 1.0 + Math.pow(rpm / 200, 2);
+                if (k > 10.0) k = 10.0; // Safety Cap
+            }
+            // 2. 滑動/線性機構 (Default/Sliding) - Linear Model
+            else {
+                // Includes: moving_bearing, plane_slide, linear_track, circle_track, chain
+                // K = 1 + RPM/1000
+                k = 1.0 + (rpm / 1000);
+            }
 
             return parseFloat(k.toFixed(2));
         }
@@ -1216,7 +1240,8 @@
                 fields: { dim1: { label: '直徑' }, dim2: { label: '齒寬' } },
                 calc: (d1, d2, qty, k) => 0.046 * (d1 / 10) * (d2 / 10) * k
             },
-            { id: 'chain', name: '鍊條', svg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            {
+                id: 'chain', name: '鍊條', svg: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
 	 viewBox="0 0 170 196" xml:space="preserve"><path fill="none" opacity="1.000000" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.000000"
 	d="
 M95.500000,54.500000 
@@ -1369,7 +1394,8 @@ M58.500000,43.000000
 	C65.413353,74.012512 73.142754,68.520569 74.651192,61.532639 
 	C76.181740,54.442341 72.254700,46.579685 65.520592,44.435345 
 	C63.361042,43.747677 61.284843,42.987904 59.000000,43.000000 
-"/></svg>`, formulaStr: 'Q = 0.008 × 長度 × 寬度 × K', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.008 * (d1 / 10) * (d2 / 10) * k },
+"/></svg>`, formulaStr: 'Q = 0.008 × 長度 × 寬度 × K', fields: { dim1: { label: '長度' }, dim2: { label: '寬度' } }, calc: (d1, d2, qty, k) => 0.008 * (d1 / 10) * (d2 / 10) * k
+            },
         ];
 
         const ALLOWED_SIZES = [0.1, 0.2, 0.3, 0.4, 0.5];
@@ -1450,9 +1476,9 @@ M58.500000,43.000000
                 );
 
                 // Watch RPM changes for new point
-                watch(() => newPoint.rpm, (newRpm) => {
+                watch([() => newPoint.rpm, selectedTypeId], ([newRpm, newTypeId]) => {
                     if (newRpm !== null && newRpm !== '') {
-                        const calculatedK = calculateK(Number(newRpm));
+                        const calculatedK = calculateRecommendedK(newTypeId, Number(newRpm));
                         if (calculatedK > 0) {
                             newPoint.kFactor = calculatedK;
                         }
@@ -1460,9 +1486,9 @@ M58.500000,43.000000
                 });
 
                 // Watch RPM changes for editing point
-                watch(() => editingPointData.rpm, (newRpm) => {
+                watch([() => editingPointData.rpm, () => editingPointData.typeId], ([newRpm, newTypeId]) => {
                     if (newRpm !== null && newRpm !== '') {
-                        const calculatedK = calculateK(Number(newRpm));
+                        const calculatedK = calculateRecommendedK(newTypeId, Number(newRpm));
                         if (calculatedK > 0) {
                             editingPointData.kFactor = calculatedK;
                         }
