@@ -91,12 +91,24 @@
             background: #6b7280;
         }
 
-        /* Tooltip adjusted to right-bottom alignment relative to icon */
         .tooltip-container {
             position: relative;
             display: inline-flex;
             align-items: center;
             cursor: help;
+        }
+
+        /* Hide default spin buttons for Chrome/Edge/Safari */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox: Restore textfield appearance for number inputs to hide spin buttons */
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
         }
 
         .tooltip-text {
@@ -137,6 +149,17 @@
             border-width: 5px;
             border-style: solid;
             border-color: #4b5563 transparent transparent transparent;
+        }
+
+        /* Tooltip Arrow for Left Side Positioning */
+        .tooltip-text.tooltip-left::after {
+            top: 50%;
+            left: 100%;
+            /* Right side of the tooltip */
+            margin-left: 0;
+            margin-top: -5px;
+            border-color: transparent transparent transparent #4b5563;
+            /* Arrow pointing right (from left border) */
         }
 
         .modal-enter-active,
@@ -771,79 +794,158 @@
                     </div>
 
                     <div class="overflow-y-auto pr-2 flex-1 space-y-3 custom-scrollbar">
-                        <div v-for="(pt, index) in points" :key="pt.id" :class="['p-4 border rounded-lg transition-all', 
+                        <template v-for="(pt, index) in points" :key="pt.id">
+                            <div v-if="!pt.isMergedChild" :class="['p-4 border rounded-lg transition-all', 
                             selectedPointIds.includes(pt.id) ? 'border-indigo-500 ring-1 ring-indigo-500/50 bg-indigo-900/20' : 
                             pt.isMergedChild ? 'bg-gray-900 border-gray-700' : 
                             assignedPointIds.has(pt.id) ? 'bg-green-900/10 border-green-800/50' : 
                             'bg-gray-800 border-gray-700 hover:border-indigo-500 shadow-sm']">
 
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-3 overflow-hidden">
-                                    <!-- V3.9: Fixed checkbox to be disabled for Merged Groups as well -->
-                                    <input type="checkbox" :value="pt.id" v-model="selectedPointIds"
-                                        :disabled="pt.isMergedChild || pt.isMerged"
-                                        class="w-4 h-4 rounded text-indigo-500 border-gray-600 focus:ring-0 cursor-pointer disabled:opacity-50 bg-gray-700">
-                                    <div
-                                        :class="['min-w-[24px] h-[24px] px-1 rounded flex items-center justify-center text-xs font-bold border', pt.isMerged ? 'bg-gray-600 text-gray-200 border-gray-500' : (assignedPointIds.has(pt.id) ? 'bg-green-900 text-green-200 border-green-800' : 'bg-gray-700 text-gray-400 border-gray-600')]">
-                                        #{{ String(index + 1).padStart(2, '0') }}
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3 overflow-hidden">
+                                        <!-- V3.9: Fixed checkbox to be disabled for Merged Groups as well -->
+                                        <input type="checkbox" :value="pt.id" v-model="selectedPointIds"
+                                            :disabled="pt.isMergedChild || pt.isMerged"
+                                            class="w-4 h-4 rounded text-indigo-500 border-gray-600 focus:ring-0 cursor-pointer disabled:opacity-50 bg-gray-700">
+                                        <div
+                                            :class="['min-w-[24px] h-[24px] px-1 rounded flex items-center justify-center text-xs font-bold border', pt.isMerged ? 'bg-gray-600 text-gray-200 border-gray-500' : (assignedPointIds.has(pt.id) ? 'bg-green-900 text-green-200 border-green-800' : 'bg-gray-700 text-gray-400 border-gray-600')]">
+                                            #{{ String(index + 1).padStart(2, '0') }}
+                                        </div>
+                                        <div class="font-bold text-gray-200 text-sm truncate" :title="pt.name">{{
+                                            pt.name }}
+                                        </div>
                                     </div>
-                                    <div class="font-bold text-gray-200 text-sm truncate" :title="pt.name">{{ pt.name }}
+                                    <div class="flex items-center space-x-1 flex-shrink-0">
+                                        <i @click="handleEditClick(pt)"
+                                            :class="['fas fa-pen-to-square btn-icon text-sm', 'text-gray-400 hover:text-indigo-400']"></i>
+                                        <i @click="removePoint(index)"
+                                            class="fas fa-trash-can btn-icon text-sm text-gray-500 hover:text-red-400"></i>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-1 flex-shrink-0">
-                                    <i @click="handleEditClick(pt)"
-                                        :class="['fas fa-pen-to-square btn-icon text-sm', 'text-gray-400 hover:text-indigo-400']"></i>
-                                    <i @click="removePoint(index)"
-                                        class="fas fa-trash-can btn-icon text-sm text-gray-500 hover:text-red-400"></i>
-                                </div>
-                            </div>
 
-                            <div class="pl-9 flex justify-between items-end">
-                                <div class="text-xs text-gray-400">
-                                    <div class="space-y-1">
-                                        <div v-if="pt.typeId === 'merged'">
-                                            <div class="font-bold italic flex items-center text-indigo-400"><i
-                                                    class="fa-solid fa-link mr-1"></i> 合併組 ({{ pt.childIds.length }} 點)
+                                <div class="pl-9 flex justify-between items-end">
+                                    <div class="text-xs text-gray-400">
+                                        <div class="space-y-1">
+                                            <div v-if="pt.typeId === 'merged'">
+                                                <div @click="pt.isCollapsed = !pt.isCollapsed"
+                                                    class="font-bold italic flex items-center text-indigo-400 cursor-pointer select-none group/toggle hover:text-indigo-300 transition-colors -ml-[42px]">
+                                                    <i
+                                                        :class="['fa-solid mr-1.5 w-4 text-center transition-transform duration-200', pt.isCollapsed ? 'fa-caret-right text-gray-500' : 'fa-caret-down text-indigo-400']"></i>
+                                                    合併組 ({{ pt.childIds.length }} 點)
+                                                </div>
                                             </div>
-                                            <!-- V3.9: Show child names -->
-                                            <div class="text-[10px] text-gray-500 pt-0.5 leading-tight">{{ pt.childNames
-                                                }}</div>
-                                        </div>
-                                        <div v-else>
-                                            <div class="flex items-center space-x-1">
-                                                <span v-if="getTypeName(pt.typeId).svg"
-                                                    v-html="getTypeName(pt.typeId).svg"
-                                                    class="w-4 h-4 text-gray-500 inline-block align-middle"></span>
-                                                <i v-else :class="getTypeName(pt.typeId).icon"
-                                                    class="text-gray-500"></i>
-                                                <span>{{ getTypeName(pt.typeId).name }}</span>
-                                                <span v-if="pt.direction">({{ pt.direction === 'horizontal' ? 'H' : 'V'
-                                                    }})</span>
+                                            <div v-else>
+                                                <div class="flex items-center space-x-1">
+                                                    <span v-if="getTypeName(pt.typeId).svg"
+                                                        v-html="getTypeName(pt.typeId).svg"
+                                                        class="w-4 h-4 text-gray-500 inline-block align-middle"></span>
+                                                    <i v-else :class="getTypeName(pt.typeId).icon"
+                                                        class="text-gray-500"></i>
+                                                    <span>{{ getTypeName(pt.typeId).name }}</span>
+                                                    <span v-if="pt.direction">({{ pt.direction === 'horizontal' ? 'H' :
+                                                        'V'
+                                                        }})</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-xs font-bold text-gray-400 pt-0.5" v-if="!pt.isMerged">
+                                                <span v-if="pt.isMergedChild"
+                                                    class="text-orange-400 font-medium mr-1"><i
+                                                        class="fa-solid fa-arrow-turn-up fa-rotate-90 mr-0.5"></i>已併入組
+                                                    |</span>
+                                                {{ getPointDimensionsStr(pt) }}
                                             </div>
                                         </div>
-                                        <div class="text-xs font-bold text-gray-400 pt-0.5" v-if="!pt.isMerged">
-                                            <span v-if="pt.isMergedChild" class="text-orange-400 font-medium mr-1"><i
-                                                    class="fa-solid fa-arrow-turn-up fa-rotate-90 mr-0.5"></i>已併入組
-                                                |</span>
-                                            {{ getPointDimensionsStr(pt) }}
+                                        <div class="flex items-center mt-1" v-if="pt.typeId !== 'merged'">
+                                            <span class="mr-1 font-semibold">K =</span>
+                                            <span class="font-mono">{{ pt.kFactor }}</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center mt-1" v-if="pt.typeId !== 'merged'">
-                                        <span class="mr-1 font-semibold">K =</span>
-                                        <span class="font-mono">{{ pt.kFactor }}</span>
+                                    <div
+                                        :class="['text-right px-2 py-1 rounded border', pt.isMergedChild ? 'bg-gray-900 border-gray-700 text-gray-600' : 'bg-blue-900/20 border-blue-800 text-blue-300']">
+                                        <div class="text-[10px] uppercase font-bold tracking-wide opacity-70">Q_req
+                                        </div>
+                                        <div class="text-lg font-mono font-bold leading-none">{{
+                                            calculatePointQ(pt).toFixed(1) }}</div>
                                     </div>
                                 </div>
-                                <div
-                                    :class="['text-right px-2 py-1 rounded border', pt.isMergedChild ? 'bg-gray-900 border-gray-700 text-gray-600' : 'bg-blue-900/20 border-blue-800 text-blue-300']">
-                                    <div class="text-[10px] uppercase font-bold tracking-wide opacity-70">Q_req</div>
-                                    <div class="text-lg font-mono font-bold leading-none">{{
-                                        calculatePointQ(pt).toFixed(1) }}</div>
+
+                                <!-- V3.21: Tree View - Optimized Space & Larger Cards -->
+                                <div v-if="pt.typeId === 'merged' && pt.childIds && pt.childIds.length > 0"
+                                    v-show="!pt.isCollapsed"
+                                    class="mt-3 pt-2 border-t border-gray-700 relative pb-1 -ml-2">
+                                    <!-- Tree Vertical Line (Pushed left) -->
+                                    <div class="absolute left-[10px] top-0 bottom-6 w-px bg-gray-600/50"></div>
+
+                                    <div v-for="childId in pt.childIds" :key="childId"
+                                        class="relative pl-[26px] mt-2 group/child">
+                                        <!-- Tree Horizontal Connector -->
+                                        <div
+                                            class="absolute left-[10px] top-1/2 -translate-y-1/2 w-[16px] h-px bg-gray-600/50">
+                                        </div>
+
+                                        <!-- Child Point Card (Larger) -->
+                                        <div v-if="getPointById(childId)"
+                                            class="bg-gray-900 border border-gray-700 rounded p-3 flex justify-between items-center hover:border-indigo-500/50 transition shadow-sm">
+
+                                            <!-- Left Info -->
+                                            <div class="flex flex-col gap-1 min-w-0 flex-1 mr-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div
+                                                        class="text-[10px] font-bold text-gray-500 font-mono bg-gray-800 px-1.5 rounded border border-gray-700">
+                                                        #{{ String(getPointIndex(childId) + 1).padStart(2, '0') }}
+                                                    </div>
+                                                    <div class="text-sm font-bold text-gray-200 truncate">{{
+                                                        getPointById(childId).name }}</div>
+                                                </div>
+
+                                                <div class="flex items-center gap-2 text-xs text-gray-400">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <i
+                                                            :class="getTypeName(getPointById(childId).typeId).icon || 'far fa-circle'"></i>
+                                                        <span>{{ getTypeName(getPointById(childId).typeId).name
+                                                            }}</span>
+                                                    </div>
+                                                    <span class="text-gray-600">|</span>
+                                                    <span class="font-mono text-gray-400 font-bold">{{
+                                                        getPointDimensionsStr(getPointById(childId)) }}</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right Info & Actions -->
+                                            <div class="flex items-center gap-3 flex-shrink-0">
+                                                <div
+                                                    class="text-right bg-black/20 px-2 py-1 rounded border border-gray-700/50">
+                                                    <div
+                                                        class="text-[9px] font-bold text-gray-500 uppercase leading-none mb-0.5">
+                                                        Q_req</div>
+                                                    <div
+                                                        class="font-mono font-bold text-gray-300 text-base leading-none">
+                                                        {{ calculatePointQ(getPointById(childId)).toFixed(1) }}</div>
+                                                </div>
+
+                                                <div class="flex flex-col gap-2 pl-2 border-l border-gray-700">
+                                                    <i @click="handleEditClick(getPointById(childId))"
+                                                        class="fas fa-pen-to-square btn-icon text-xs p-1 text-gray-500 hover:text-indigo-400"
+                                                        title="編輯"></i>
+                                                    <i @click="removePoint(getPointIndex(childId))"
+                                                        class="fas fa-trash-can btn-icon text-xs p-1 text-gray-600 hover:text-red-400"
+                                                        title="刪除"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fallback -->
+                                        <div v-else class="text-xs text-red-500 italic pl-2">
+                                            遺失的潤滑點 (ID: {{ childId }})
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </template>
                         <div v-if="points.length === 0"
                             class="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">
-                            <i class="fas fa-arrow-up mb-2"></i><br>請點擊右上角新增潤滑點
+                            <i class="fas fa-arrow-up mb-2"
+                                style="transform: rotate(45deg); display: inline-block;"></i><br>請點擊右上角「新增潤滑點」
                         </div>
                     </div>
                 </div>
@@ -854,7 +956,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-white flex items-center">
                             <span
-                                class="bg-purple-900/50 text-purple-400 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-purple-800">3</span>
+                                class="bg-purple-900/50 text-purple-400 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-purple-800">2</span>
                             分配器編組
                         </h2>
                         <div class="flex items-center space-x-2">
@@ -891,8 +993,8 @@
                                 <div class="flex items-center space-x-3">
                                     <div
                                         class="flex bg-gray-800 rounded border border-gray-600 overflow-hidden shadow-sm">
-                                        <button @click="addSlot(gIndex)"
-                                            class="px-3 py-1.5 hover:bg-purple-900/30 text-purple-400 text-xs font-bold border-r border-gray-600 transition"
+                                        <button @click="addSlot(gIndex)" :disabled="groups[gIndex].slots.length >= 7"
+                                            class="px-3 py-1.5 hover:bg-purple-900/30 text-purple-400 text-xs font-bold border-r border-gray-600 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
                                             title="增加孔位"><i class="fas fa-plus"></i></button>
                                         <button @click="removeLastSlot(gIndex)"
                                             :disabled="groups[gIndex].slots.length <= 1"
@@ -918,7 +1020,7 @@
                                             + 1 }}</div>
                                         <select v-model="groups[gIndex].slots[sIndex]"
                                             class="flex-1 text-sm border border-gray-600 rounded p-2 focus:border-purple-500 focus:outline-none bg-gray-700 text-white">
-                                            <option :value="null" class="text-gray-400">-- 塞頭 (Plug) --</option>
+                                            <option :value="null" class="text-gray-400">-- 塞頭 --</option>
                                             <template v-for="(pt, pIdx) in points">
                                                 <option
                                                     v-if="!pt.isMergedChild && (!assignedPointIds.has(pt.id) || pt.id === groups[gIndex].slots[sIndex])"
@@ -937,12 +1039,17 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="bg-black rounded-lg p-4 relative overflow-hidden text-white shadow-inner border border-gray-700">
-                                    <div class="absolute top-0 right-0 p-2 opacity-20"><i
-                                            class="fa-solid fa-calculator text-white text-5xl"></i></div>
+                                    class="bg-black rounded-lg p-4 relative text-white shadow-inner border border-gray-700">
                                     <div class="flex justify-between items-end mb-3 relative z-10">
-                                        <div class="text-sm text-gray-400 uppercase font-bold tracking-wider">分配器規格代碼
-                                            (1-5)</div>
+                                        <div class="flex items-center">
+                                            <div class="text-sm text-gray-400 uppercase font-bold tracking-wider">
+                                                分配器規格代碼 (1-5)</div>
+                                            <div class="ml-2 cursor-help" @mouseenter="showCodeTooltip"
+                                                @mouseleave="hideCodeTooltip">
+                                                <i
+                                                    class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i>
+                                            </div>
+                                        </div>
                                         <div class="text-xs text-purple-400" v-if="systemMinQ > 0">Base: Qmin={{
                                             systemMinQ.toFixed(1) }}</div>
                                     </div>
@@ -974,7 +1081,7 @@
                             </div>
                             <!-- Part Number Editor (Always Visible, Footer Style) -->
                             <div class="p-4 border-t border-gray-700 bg-gray-800">
-                                <div class="flex items-end space-x-2">
+                                <div class="flex items-end space-x-2 mb-3">
                                     <!-- 1. 型號 (Prefix) -->
                                     <div class="shrink-0" style="width: 70px; flex: none;">
                                         <label class="text-xs font-bold text-gray-400 block mb-1">型號</label>
@@ -1008,12 +1115,46 @@
                                             <option value="S">S：其他規格請註明</option>
                                         </select>
                                     </div>
+                                </div>
 
-                                    <!-- Copy Button -->
+                                <!-- Part Number Display -->
+                                <!-- Part Number Display -->
+                                <div class="w-full flex items-center space-x-2">
+                                    <!-- Container for Part Number + Warning Icon (Left-aligned) -->
+                                    <div class="flex-1 flex justify-start border-b border-gray-500 pb-1 relative">
+                                        <!-- Part Number Text -->
+                                        <div class="font-mono font-bold text-left text-lg select-all cursor-text flex items-center"
+                                            :class="{'text-red-500': groups[gIndex].partPrefix === 'CDB' && ![1, 2, 3, 5].includes(groups[gIndex].slots.length), 'text-indigo-400': !(groups[gIndex].partPrefix === 'CDB' && ![1, 2, 3, 5].includes(groups[gIndex].slots.length))}"
+                                            @click="$event.target.closest('.flex-1').querySelector('input').select()">
+                                            <span>509-{{ groups[gIndex].partPrefix }}-{{
+                                                groups[gIndex].partPrefix === 'T' ? groups[gIndex].slots.length * 100 :
+                                                groups[gIndex].slots.length }}</span>
+                                            <span>-</span>
+                                            <span>A-{{ groupRes.items.map(i => i.code).join('')
+                                                }}-{{ groups[gIndex].partSuffix1 }}{{ groups[gIndex].partSuffix2
+                                                }}</span>
+
+                                            <!-- Hidden input for copy functionality -->
+                                            <input type="text" readonly :value="getPartNumber(groups[gIndex], groupRes)"
+                                                class="absolute opacity-0 w-1 h-1" style="z-index: -1;">
+                                        </div>
+
+                                        <!-- CDB Warning Icon (Inline with text, slight spacing) -->
+                                        <div v-if="groups[gIndex].partPrefix === 'CDB' && ![1, 2, 3, 5].includes(groups[gIndex].slots.length)"
+                                            class="tooltip-container ml-2 relative top-[2px]">
+                                            <i
+                                                class="fa-solid fa-circle-exclamation text-red-500 text-lg animate-pulse cursor-help"></i>
+                                            <span class="tooltip-text bg-red-900 border-red-700 text-white"
+                                                style="width: max-content; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 10px; white-space: nowrap;">
+                                                廠商無對應的規格品。請挑選其他規格，或者向廠商確認。
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <button @click="copyPartNumber(groups[gIndex], groupRes)"
-                                        class="bg-indigo-600 hover:bg-indigo-500 text-white rounded px-4 py-1.5 h-[32px] flex items-center justify-center transition shadow-sm border border-indigo-700 ml-2 font-bold text-sm"
-                                        title="複製件號">
-                                        <i class="fas fa-copy mr-1"></i> 複製
+                                        class="text-gray-400 hover:text-white transition px-2 py-1 rounded hover:bg-gray-700"
+                                        title="複製">
+                                        <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1028,7 +1169,7 @@
                 <div class="card border-t-4 border-orange-600 bg-gray-800">
                     <h2 class="text-lg font-bold mb-4 text-white flex items-center">
                         <span
-                            class="bg-orange-900/50 text-orange-400 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-orange-800">4</span>
+                            class="bg-orange-900/50 text-orange-400 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-orange-800">3</span>
                         系統摘要
                     </h2>
                     <div
@@ -1070,7 +1211,7 @@
                 <div class="card border-t-4 border-slate-500 bg-gray-800">
                     <h2 class="text-lg font-bold mb-4 text-white flex items-center">
                         <span
-                            class="bg-gray-700 text-gray-300 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-gray-600">5</span>
+                            class="bg-gray-700 text-gray-300 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-bold border border-gray-600">4</span>
                         注油機與管路設計
                     </h2>
                     <div class="space-y-4">
@@ -1078,18 +1219,41 @@
                             <div class="flex items-center justify-between mb-1"><label
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">主管長度 (m)</label>
                                 <div class="tooltip-container"><i
-                                        class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                        class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                         class="tooltip-text">包含注油機與所有分配器之間軟管及硬管的總長度。</span></div>
-                            </div><input v-model.number="settings.pipeLength" type="number" class="input-field py-1.5">
+                            </div>
+                            <div class="relative group">
+                                <input v-model.number="settings.pipeLength" type="number"
+                                    class="input-field py-1.5 pr-8" onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('pipeLength', 1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('pipeLength', -1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1"><label
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">主管內徑 (mm)</label>
                                 <div class="tooltip-container"><i
-                                        class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                        class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                         class="tooltip-text">內徑大小不一致時，以最大內徑為設定值。</span></div>
-                            </div><input v-model.number="settings.pipeDiameter" type="number"
-                                class="input-field py-1.5">
+                            </div>
+                            <div class="relative group">
+                                <input v-model.number="settings.pipeDiameter" type="number"
+                                    class="input-field py-1.5 pr-8" onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('pipeDiameter', 1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('pipeDiameter', -1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div
                             class="bg-blue-900/20 border border-blue-800 rounded px-2 py-1.5 flex justify-between items-center text-xs">
@@ -1101,33 +1265,77 @@
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">泵浦吐出量
                                     (cc/min)</label>
                                 <div class="tooltip-container"><i
-                                        class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                        class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                         class="tooltip-text">以注油機廠商提供參數為準。</span></div>
-                            </div><input v-model.number="settings.pumpFlow" type="number" class="input-field py-1.5">
+                            </div>
+                            <div class="relative group">
+                                <input v-model.number="settings.pumpFlow" type="number" class="input-field py-1.5 pr-8"
+                                    onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('pumpFlow', 10)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('pumpFlow', -10)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1"><label
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">卸壓時間 (s)</label>
                                 <div class="tooltip-container"><i
-                                        class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                        class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                         class="tooltip-text">分配器儲油之後主管路必須卸壓，分配器才會開始排油。根據管路長度調整。</span></div>
-                            </div><input v-model.number="settings.reliefTime" type="number" step="0.1"
-                                class="input-field py-1.5">
+                            </div>
+                            <div class="relative group">
+                                <input v-model.number="settings.reliefTime" type="number" step="0.1"
+                                    class="input-field py-1.5 pr-8" onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('reliefTime', 0.1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('reliefTime', -0.1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1"><label
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">分配器回復時間 (s)</label>
                                 <div class="tooltip-container"><i
-                                        class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                        class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                         class="tooltip-text">分配器排油之後，內部油塞復位的時間。可視實際情況調整。</span></div>
-                            </div><input v-model.number="settings.resetTime" type="number" step="0.1"
-                                class="input-field py-1.5">
+                            </div>
+                            <div class="relative group">
+                                <input v-model.number="settings.resetTime" type="number" step="0.1"
+                                    class="input-field py-1.5 pr-8" onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('resetTime', 0.1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('resetTime', -0.1)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1"><label
                                     class="text-xs font-bold text-gray-400 uppercase tracking-wider">安全係數</label></div>
-                            <input v-model.number="settings.safetyFactor" type="number" step="0.1"
-                                class="input-field py-1.5">
+                            <div class="relative group">
+                                <input v-model.number="settings.safetyFactor" type="number" step="0.1"
+                                    class="input-field py-1.5 pr-8" onfocus="this.select()">
+                                <div class="absolute inset-y-1 right-1 flex flex-col w-5 my-1">
+                                    <button @click="adjustSetting('safetyFactor', 0.05)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-up text-[10px]"></i></button>
+                                    <button @click="adjustSetting('safetyFactor', -0.05)"
+                                        class="flex-1 text-white hover:text-indigo-400 flex items-center justify-center transition-colors"
+                                        tabindex="-1"><i class="fas fa-caret-down text-[10px]"></i></button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="pt-4 border-t border-gray-700 mt-2 space-y-3">
@@ -1146,10 +1354,12 @@
                             <div class="flex justify-between text-sm items-center"><span
                                     class="text-gray-500 flex items-center">裝置最低停止時間<div class="tooltip-container ml-1">
                                         <i
-                                            class="fa-solid fa-circle-exclamation text-gray-500 hover:text-indigo-400"></i><span
+                                            class="fa-solid fa-circle-question text-gray-500 hover:text-indigo-400"></i><span
                                             class="tooltip-text">管路卸壓與分配器排油的時間。若時間過短，可能造成分配器排油不完全。</span>
                                     </div>
-                                    :</span><span class="font-mono font-bold text-blue-400">{{
+                                    <div class="tooltip-container ml-1"></div>
+                                    :
+                                </span><span class="font-mono font-bold text-blue-400">{{
                                     pumpTimes.minStopTime.toFixed(1) }} s</span></div>
                             <div class="flex justify-between text-base font-bold text-indigo-400 pt-3 items-center">
                                 <span>最低潤滑週期:</span>
@@ -1174,6 +1384,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Global Tooltip (Teleported) -->
+        <teleport to="body">
+            <div v-if="tooltipData.visible"
+                class="fixed z-[9999] bg-gray-900 border border-gray-600 rounded shadow-xl text-left text-xs leading-relaxed p-3 transition-opacity duration-200"
+                style="width: 150px;"
+                :style="{ top: tooltipData.top + 'px', left: tooltipData.left + 'px', transform: 'translateY(-50%)' }">
+
+                <!-- Arrow (Border) pointing left -->
+                <div
+                    class="absolute top-1/2 -translate-y-1/2 right-full w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[6px] border-r-gray-600">
+                </div>
+                <!-- Arrow (Background match) pointing left -->
+                <div
+                    class="absolute top-1/2 -translate-y-1/2 right-full w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[6px] border-r-gray-900 translate-x-[1px]">
+                </div>
+
+                <div class="font-bold mb-1 border-b border-gray-600 pb-1 text-yellow-400">
+                    各代碼吐出量：</div>
+                <div>0：塞孔</div>
+                <div>1：0.1cc</div>
+                <div>2：0.2cc</div>
+                <div>3：0.3cc</div>
+                <div>4：0.4cc</div>
+                <div>5：0.5cc</div>
+            </div>
+        </teleport>
     </div>
 
     <script>
@@ -1499,7 +1736,7 @@ M58.500000,43.000000
                 const resetAllData = () => {
                     if (confirm('確定要清空所有資料嗎？此操作無法復原。')) {
                         points.value = [];
-                        groups.value = [{ id: 101, name: 'Group A', slots: [null], isEditing: false }];
+                        groups.value = [{ id: 101, name: 'Group A', slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' }];
                         Object.assign(settings, { pipeLength: 5, pipeDiameter: 4, pumpFlow: 100, safetyFactor: 1.25, reliefTime: 10, resetTime: 1.5 });
                         nextPointId = 1;
                         nextGroupId = 102;
@@ -1657,27 +1894,31 @@ M58.500000,43.000000
                     const childIds = targets.map(p => p.id);
                     targets.forEach(p => p.isMergedChild = true);
                     const names = targets.map(p => p.name).join(', ');
-                    points.value.push({ id: nextPointId++, name: `合併群組`, typeId: 'merged', kFactor: 0, isMerged: true, isMergedChild: false, isEditing: false, childNames: names, childIds: childIds });
+                    points.value.push({ id: nextPointId++, name: `合併群組`, typeId: 'merged', kFactor: 0, isMerged: true, isMergedChild: false, isEditing: false, isCollapsed: false, childNames: names, childIds: childIds });
                     selectedPointIds.value = [];
                 };
 
                 const addGroup = () => groups.value.push({ id: nextGroupId++, name: `Group ${String.fromCharCode(65 + groups.value.length)}`, slots: [null], isEditing: false, isCollapsed: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' });
                 const removeGroup = (index) => groups.value.splice(index, 1);
-                const addSlot = (i) => groups.value[i].slots.push(null);
+                const addSlot = (i) => { if (groups.value[i].slots.length < 7) groups.value[i].slots.push(null); };
                 const removeLastSlot = (i) => { if (groups.value[i].slots.length > 1) groups.value[i].slots.splice(groups.value[i].slots.length - 1, 1); };
                 const deleteSlot = (gIndex, sIndex) => { groups.value[gIndex].slots.splice(sIndex, 1); };
                 const moveSlot = (gIndex, sIndex, dir) => { const grp = groups.value[gIndex]; const nIdx = sIndex + dir; if (nIdx >= 0 && nIdx < grp.slots.length) { [grp.slots[sIndex], grp.slots[nIdx]] = [grp.slots[nIdx], grp.slots[sIndex]]; } };
 
                 // V3.13: Copy Part Number Logic (Final Robust Version)
-                const copyPartNumber = async (group, groupRes) => {
+                const getPartNumber = (group, groupRes) => {
+                    if (!group || !groupRes || !groupRes.items) return '';
                     const prefix = group.partPrefix || 'T';
                     const slotCount = group.slots.length;
                     const size = prefix === 'T' ? slotCount * 100 : slotCount;
                     const specCode = groupRes.items.map(i => i.code).join('');
                     const s1 = group.partSuffix1 || '';
                     const s2 = group.partSuffix2 || '';
+                    return `509-${prefix}-${size}-A-${specCode}-${s1}${s2}`;
+                };
 
-                    const partNum = `${prefix}-${size}-A-${specCode}-${s1}${s2}`;
+                const copyPartNumber = async (group, groupRes) => {
+                    const partNum = getPartNumber(group, groupRes);
 
                     try {
                         if (navigator.clipboard) {
@@ -2080,6 +2321,26 @@ M58.500000,43.000000
                     groups.value.forEach(g => g.isCollapsed = anyExpanded);
                 };
 
+                const adjustSetting = (key, delta) => {
+                    if (settings[key] !== undefined) {
+                        settings[key] = parseFloat((settings[key] + delta).toFixed(2));
+                        if (settings[key] < 0) settings[key] = 0;
+                    }
+                };
+
+                // V3.15: Floating Tooltip System (Teleported)
+                const tooltipData = reactive({ visible: false, top: 0, left: 0 });
+                const showCodeTooltip = (event) => {
+                    const rect = event.target.getBoundingClientRect();
+                    // Position: Center vertical, Right of icon
+                    tooltipData.left = rect.right + 12;
+                    tooltipData.top = rect.top + rect.height / 2;
+                    tooltipData.visible = true;
+                };
+                const hideCodeTooltip = () => {
+                    tooltipData.visible = false;
+                };
+
                 const getTypeName = (id) => { if (id === 'merged') return { name: '組合點', icon: 'fa-solid fa-link' }; return lubeTypes.find(t => t.id === id) || { name: '-', icon: '' }; };
 
                 return {
@@ -2094,7 +2355,8 @@ M58.500000,43.000000
                     availablePointsForEdit, addChildToGroup, removeChildFromGroup, selectedPointToAddId,
                     // V3.8 new exports
                     showEditPointModal, editingPointData, editCurrentType, saveEditPoint,
-                    resetAllData, copyPartNumber, toggleAllFold
+                    resetAllData, copyPartNumber, getPartNumber, toggleAllFold, adjustSetting,
+                    tooltipData, showCodeTooltip, hideCodeTooltip
                 };
             }
         }).mount('#app');
