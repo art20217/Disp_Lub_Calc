@@ -269,8 +269,7 @@
         <!-- Modal: Add Point (V3.12: Added RPM Field) -->
         <transition name="modal">
             <div v-if="showAddModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-                @click.self="showAddModal = false">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                 <div
                     class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-700">
                     <div class="flex justify-between items-center p-5 border-b border-gray-700">
@@ -380,8 +379,7 @@
         <!-- Modal: Edit Point (V3.12: Added RPM Field) -->
         <transition name="modal">
             <div v-if="showEditPointModal"
-                class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-                @click.self="showEditPointModal = false">
+                class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                 <div
                     class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-700">
                     <div class="flex justify-between items-center p-5 border-b border-gray-700">
@@ -497,8 +495,7 @@
 
         <transition name="modal">
             <div v-if="showExportModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-                @click.self="showExportModal = false">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                 <div
                     class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[90vh] border border-gray-700">
                     <div
@@ -574,8 +571,7 @@
 
         <transition name="modal">
             <div v-if="showImportModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-                @click.self="showImportModal = false">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                 <div
                     class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[90vh] border border-gray-700">
                     <div
@@ -663,8 +659,7 @@
         <!-- Modal: Edit Merged Group -->
         <transition name="modal">
             <div v-if="showEditMergedModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-                @click.self="showEditMergedModal = false">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                 <div
                     class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-gray-700">
                     <div
@@ -675,6 +670,15 @@
                     </div>
 
                     <div class="p-6 overflow-y-auto max-h-[70vh] custom-scrollbar bg-gray-900 flex flex-col space-y-4">
+
+                        <!-- Name Editor -->
+                        <div v-if="editedGroupId && getPointById(editedGroupId)"
+                            class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm">
+                            <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">群組名稱</label>
+                            <input v-model="getPointById(editedGroupId).name" type="text"
+                                class="input-field font-bold text-white bg-gray-700 focus:border-indigo-500"
+                                placeholder="請輸入群組名稱">
+                        </div>
 
                         <div class="space-y-3 flex-1">
                             <div v-for="(pt, index) in editingMergedChildren" :key="pt.id"
@@ -968,7 +972,7 @@
                             </button>
                             <button @click="addGroup"
                                 class="text-sm bg-purple-700 text-white px-3 py-1.5 rounded hover:bg-purple-600 transition font-bold shadow-sm border border-purple-800">
-                                <i class="fas fa-plus mr-1"></i> 新增分配器組
+                                <i class="fas fa-plus mr-1"></i> 新增分配器
                             </button>
                         </div>
                     </div>
@@ -1028,14 +1032,14 @@
                                                     | {{ pt.name }}</option>
                                             </template>
                                         </select>
-                                        <div class="w-16 text-right"><span
+                                        <div class="w-16 text-center"><span
                                                 v-if="getPointById(groups[gIndex].slots[sIndex])"
                                                 class="inline-block px-2 py-1 rounded bg-green-900 text-green-300 font-bold font-mono text-sm border border-green-800">{{
                                                 calculatePointQ(getPointById(groups[gIndex].slots[sIndex])).toFixed(1)
                                                 }}</span><span v-else class="text-sm text-gray-600">-</span></div>
-                                        <button @click="deleteSlot(gIndex, sIndex)"
-                                            class="text-gray-500 hover:text-red-400 text-sm px-1 transition-colors"
-                                            title="刪除此孔位"><i class="fas fa-trash-alt"></i></button>
+                                        <i @click="deleteSlot(gIndex, sIndex)"
+                                            class="fas fa-trash-can btn-icon text-sm text-gray-500 hover:text-red-400"
+                                            title="刪除此孔位"></i>
                                     </div>
                                 </div>
                                 <div
@@ -1159,8 +1163,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div v-if="groups.length === 0"
+                            class="mt-8 text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">
+                            <i class="fas fa-arrow-up mb-2"
+                                style="transform: rotate(45deg); display: inline-block;"></i><br>請點擊右上角「新增分配器」
+                        </div>
                     </div>
-                    <div v-if="groups.length === 0" class="text-center text-gray-500 py-12">點擊上方按鈕新增第一組分配器</div>
                 </div>
             </div>
 
@@ -1644,7 +1652,7 @@ M58.500000,43.000000
                 const selectedPointIds = ref([]);
                 const newPoint = reactive({ name: '', kFactor: 1.0, rpm: null, direction: 'horizontal', dim1: 0, dim2: 0, qty: 1 });
                 const points = ref([]);
-                const groups = ref([{ id: 101, name: 'Group A', slots: [null], isEditing: false, isCollapsed: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' }]);
+                const groups = ref([]);
                 const settings = reactive({ pipeLength: 5, pipeDiameter: 4, pumpFlow: 100, safetyFactor: 1.25, reliefTime: 10, resetTime: 1.5 });
 
                 const showAddModal = ref(false);
@@ -1668,7 +1676,7 @@ M58.500000,43.000000
                 const exportGroupSelection = ref([]);
 
                 let nextPointId = 1;
-                let nextGroupId = 102;
+                let nextGroupId = 101;
 
                 // V3.4: Auto-Save System
                 onMounted(() => {
@@ -1736,10 +1744,10 @@ M58.500000,43.000000
                 const resetAllData = () => {
                     if (confirm('確定要清空所有資料嗎？此操作無法復原。')) {
                         points.value = [];
-                        groups.value = [{ id: 101, name: 'Group A', slots: [null], isEditing: false, partPrefix: 'T', partSuffix1: 'A', partSuffix2: 'G' }];
+                        groups.value = [];
                         Object.assign(settings, { pipeLength: 5, pipeDiameter: 4, pumpFlow: 100, safetyFactor: 1.25, reliefTime: 10, resetTime: 1.5 });
                         nextPointId = 1;
-                        nextGroupId = 102;
+                        nextGroupId = 101;
                         localStorage.removeItem('lubeSystemData_v34');
                     }
                 };
@@ -2306,7 +2314,11 @@ M58.500000,43.000000
                             id: newGId,
                             name: g.name,
                             slots: newSlots,
-                            isEditing: false
+                            isEditing: false,
+                            isCollapsed: g.isCollapsed || false,
+                            partPrefix: g.partPrefix || 'T',
+                            partSuffix1: g.partSuffix1 || 'A',
+                            partSuffix2: g.partSuffix2 || 'G'
                         });
                     });
                     nextGroupId = tempGroupIdCounter;
@@ -2352,7 +2364,7 @@ M58.500000,43.000000
                     addGroup, removeGroup, addSlot, removeLastSlot, deleteSlot, moveSlot,
                     allGroupResults, systemMinQ, systemStats, Q_dist_total, pipeVolume, pumpTimes,
                     openExportModal, selectAllExport, toggleAllExportGroups, confirmExport, getTypeName, assignedPointIds, getPointDimensionsStr,
-                    availablePointsForEdit, addChildToGroup, removeChildFromGroup, selectedPointToAddId,
+                    availablePointsForEdit, addChildToGroup, removeChildFromGroup, selectedPointToAddId, editedGroupId,
                     // V3.8 new exports
                     showEditPointModal, editingPointData, editCurrentType, saveEditPoint,
                     resetAllData, copyPartNumber, getPartNumber, toggleAllFold, adjustSetting,

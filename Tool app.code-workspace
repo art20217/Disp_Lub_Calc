@@ -9,6 +9,9 @@
 		{
 			"name": "Geom_Tol_App",
 			"path": "../Geom_Tol_App"
+		},
+		{
+			"path": "../engineering-hub"
 		}
 	],
 	"settings": {
