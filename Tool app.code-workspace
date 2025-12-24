@@ -12,6 +12,9 @@
 		},
 		{
 			"path": "../engineering-hub"
+		},
+		{
+			"path": "../SpecKit/Tool_Hub"
 		}
 	],
 	"settings": {
