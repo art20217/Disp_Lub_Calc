@@ -5,7 +5,7 @@
 
 ## 線上展示 (Live Demo)
 本應用程式已託管於以下網址，可直接線上使用：
-- **[]()**
+- **[https://ll-rd-app.web.app](https://ll-rd-app.web.app)**
 
 ## 主要功能
 
